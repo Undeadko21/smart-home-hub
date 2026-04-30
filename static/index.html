@@ -2,87 +2,246 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,maximum-scale=1">
 <title>Smart Kiosk</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
 <style>
-*{box-sizing:border-box}
-body{margin:0;font-family:system-ui;background:#0f172a;color:#e2e8f0;height:100vh;display:flex;flex-direction:column}
-.header{background:#1e293b;padding:12px 16px;display:flex;justify-content:space-between;align-items:center}
-h1{margin:0;font-size:1.2rem;display:flex;align-items:center;gap:8px}
-.badge{padding:4px 10px;border-radius:12px;font-size:.75rem}
-.badge.ok{background:rgba(34,197,94,.2);color:#22c55e}.badge.err{background:rgba(239,68,68,.2);color:#ef4444}
-.main{flex:1;display:flex;overflow:hidden}
-.chat-panel{flex:1;display:flex;flex-direction:column;padding:16px;max-width:800px;margin:0 auto;width:100%}
-.chat-messages{flex:1;overflow-y:auto;background:#1e293b;border-radius:12px;padding:16px;margin-bottom:12px}
-.message{margin:12px 0;padding:12px 16px;border-radius:12px;max-width:85%}
-.message.user{background:#3b82f6;margin-left:auto;border-bottom-right-radius:4px}
-.message.ai{background:#334155;border-bottom-left-radius:4px}
-.message.system{background:#1e293b;border:1px solid #475569;text-align:center;margin:8px auto;font-size:.85rem;color:#94a3b8}
+:root{
+--md-sys-color-primary:#6750A4;
+--md-sys-color-on-primary:#FFFFFF;
+--md-sys-color-primary-container:#EADDFF;
+--md-sys-color-on-primary-container:#21005D;
+--md-sys-color-secondary:#625B71;
+--md-sys-color-secondary-container:#E8DEF8;
+--md-sys-color-on-secondary-container:#1D192B;
+--md-sys-color-tertiary:#7D5260;
+--md-sys-color-tertiary-container:#FFD8E4;
+--md-sys-color-on-tertiary-container:#31111D;
+--md-sys-color-error:#B3261E;
+--md-sys-color-background:#1C1B1F;
+--md-sys-color-on-background:#E6E1E5;
+--md-sys-color-surface:#1C1B1F;
+--md-sys-color-surface-variant:#49454F;
+--md-sys-color-on-surface:#E6E1E5;
+--md-sys-color-on-surface-variant:#CAC4D0;
+--md-sys-color-outline:#938F99;
+--md-sys-color-success:#4CAF50;
+--md-sys-color-warning:#FF9800;
+--md-elevation-1:0 1px 2px rgba(0,0,0,0.3),0 1px 3px 1px rgba(0,0,0,0.15);
+--md-elevation-2:0 1px 2px rgba(0,0,0,0.3),0 2px 6px 2px rgba(0,0,0,0.15);
+--md-elevation-3:0 4px 8px 3px rgba(0,0,0,0.15),0 1px 3px rgba(0,0,0,0.3);
+--md-shape-corner-small:8px;
+--md-shape-corner-medium:12px;
+--md-shape-corner-large:16px;
+--md-shape-corner-full:999px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Roboto',system-ui,sans-serif;background:var(--md-sys-color-background);color:var(--md-sys-color-on-background);height:100vh;display:flex;flex-direction:column;overflow:hidden}
+/* App Bar */
+.app-bar{background:var(--md-sys-color-surface);padding:12px 16px;display:flex;justify-content:space-between;align-items:center;box-shadow:var(--md-elevation-2);position:sticky;top:0;z-index:100}
+.app-bar-left{display:flex;align-items:center;gap:16px}
+.app-title{font-size:1.25rem;font-weight:500;color:var(--md-sys-color-on-surface);display:flex;align-items:center;gap:8px}
+.status-chip{padding:6px 12px;border-radius:var(--md-shape-corner-full);font-size:.75rem;font-weight:500;display:flex;align-items:center;gap:6px}
+.status-chip.ok{background:rgba(76,175,80,.2);color:var(--md-sys-color-success)}
+.status-chip.err{background:rgba(179,38,30,.2);color:var(--md-sys-color-error)}
+.app-bar-actions{display:flex;gap:8px}
+.icon-btn{background:transparent;border:none;color:var(--md-sys-color-on-surface);width:40px;height:40px;border-radius:var(--md-shape-corner-full);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .2s}
+.icon-btn:hover{background:rgba(230,225,229,.1)}
+.icon-btn:active{background:rgba(230,225,229,.2)}
+.icon-btn.primary{background:var(--md-sys-color-primary);color:var(--md-sys-color-on-primary)}
+.icon-btn.primary:hover{background:#7E6AB8}
+/* Main Content */
+.main-content{flex:1;display:flex;overflow:hidden;position:relative}
+/* Widgets Grid - Main Screen */
+.widgets-container{flex:1;padding:16px;overflow-y:auto;display:none}
+.widgets-container.show{display:block}
+.widgets-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;max-width:1200px;margin:0 auto}
+.widget-card{background:var(--md-sys-color-surface-variant);border-radius:var(--md-shape-corner-large);padding:16px;min-height:120px;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer;transition:transform .2s,box-shadow .2s;position:relative;overflow:hidden}
+.widget-card:hover{box-shadow:var(--md-elevation-3);transform:translateY(-2px)}
+.widget-card:active{transform:scale(.98)}
+.widget-card.active{background:linear-gradient(135deg,var(--md-sys-color-primary),var(--md-sys-color-tertiary))}
+.widget-icon{font-size:2rem;color:var(--md-sys-color-on-surface-variant);margin-bottom:8px}
+.widget-card.active .widget-icon{color:var(--md-sys-color-on-primary)}
+.widget-name{font-size:.9rem;font-weight:500;color:var(--md-sys-color-on-surface);margin-bottom:4px}
+.widget-card.active .widget-name{color:var(--md-sys-color-on-primary)}
+.widget-state{font-size:.75rem;color:var(--md-sys-color-on-surface-variant)}
+.widget-card.active .widget-state{color:rgba(255,255,255,.8)}
+.widget-toggle{position:absolute;top:8px;right:8px;width:32px;height:32px;border-radius:var(--md-shape-corner-full);background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;cursor:pointer}
+.widget-toggle .material-icons-round{font-size:20px}
+.add-widget-btn{border:2px dashed var(--md-sys-color-outline);background:transparent;border-radius:var(--md-shape-corner-large);min-height:120px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;color:var(--md-sys-color-on-surface-variant);transition:all .2s}
+.add-widget-btn:hover{border-color:var(--md-sys-color-primary);color:var(--md-sys-color-primary};background:rgba(103,80,164,.1)}
+.add-widget-btn .material-icons-round{font-size:2.5rem;margin-bottom:8px}
+/* Devices Panel */
+.devices-panel{width:360px;background:var(--md-sys-color-surface);border-left:1px solid var(--md-sys-color-surface-variant);display:none;flex-direction:column;z-index:50}
+.devices-panel.show{display:flex}
+.panel-header{padding:16px;border-bottom:1px solid var(--md-sys-color-surface-variant);display:flex;justify-content:space-between;align-items:center}
+.panel-title{font-size:1rem;font-weight:500;color:var(--md-sys-color-on-surface)}
+.device-list{flex:1;overflow-y:auto;padding:8px}
+.device-category{margin-bottom:16px}
+.category-header{font-size:.75rem;font-weight:500;color:var(--md-sys-color-on-surface-variant);text-transform:uppercase;letter-spacing:1px;padding:8px 12px;display:flex;align-items:center;gap:8px}
+.device-item{background:var(--md-sys-color-surface-variant);border-radius:var(--md-shape-corner-medium);padding:12px;margin:4px 0;display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:background .2s}
+.device-item:hover{background:var(--md-sys-color-secondary-container)}
+.device-info{flex:1}
+.device-name{font-weight:500;font-size:.9rem;color:var(--md-sys-color-on-surface)}
+.device-status{font-size:.75rem;color:var(--md-sys-color-on-surface-variant);margin-top:2px}
+.device-action{display:flex;align-items:center;gap:8px}
+/* FAB Button */
+.fab{position:fixed;bottom:24px;right:24px;width:56px;height:56px;border-radius:var(--md-shape-corner-large);background:var(--md-sys-color-primary-container);color:var(--md-sys-color-on-primary-container);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:var(--md-elevation-3);transition:transform .2s,box-shadow .2s;z-index:200}
+.fab:hover{box-shadow:0 6px 12px 4px rgba(0,0,0,.15);transform:translateY(-2px)}
+.fab:active{transform:scale(.95)}
+.fab .material-icons-round{font-size:24px}
+/* Bottom Sheet for Device List */
+.bottom-sheet{position:fixed;bottom:0;left:0;right:0;background:var(--md-sys-color-surface);border-radius:24px 24px 0 0;box-shadow:var(--md-elevation-3);transform:translateY(100%);transition:transform .3s;z-index:300;max-height:80vh;display:flex;flex-direction:column}
+.bottom-sheet.show{transform:translateY(0)}
+.sheet-handle{width:40px;height:4px;background:var(--md-sys-color-surface-variant);border-radius:2px;margin:12px auto}
+.sheet-header{padding:0 24px 16px;display:flex;justify-content:space-between;align-items:center}
+.sheet-title{font-size:1.25rem;font-weight:500;color:var(--md-sys-color-on-surface)}
+.sheet-content{flex:1;overflow-y:auto;padding:0 24px 24px}
+/* Dialog */
+.dialog-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:400}
+.dialog-overlay.show{display:flex}
+.dialog{background:var(--md-sys-color-surface);border-radius:24px;padding:24px;max-width:400px;width:90%;max-height:80vh;overflow-y:auto}
+.dialog-title{font-size:1.25rem;font-weight:500;color:var(--md-sys-color-on-surface);margin-bottom:16px}
+.dialog-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:24px}
+.btn-filled{background:var(--md-sys-color-primary);color:var(--md-sys-color-on-primary);border:none;padding:10px 24px;border-radius:var(--md-shape-corner-full);font-weight:500;cursor:pointer;transition:background .2s}
+.btn-filled:hover{background:#7E6AB8}
+.btn-text{background:transparent;color:var(--md-sys-color-primary);border:none;padding:10px 24px;border-radius:var(--md-shape-corner-full);font-weight:500;cursor:pointer}
+.btn-text:hover{background:rgba(103,80,164,.1)}
+/* Chat Panel */
+.chat-panel{flex:1;display:flex;flex-direction:column;padding:16px;max-width:800px;margin:0 auto;width:100%;display:none}
+.chat-panel.show{display:flex}
+.chat-messages{flex:1;overflow-y:auto;padding:16px;margin-bottom:16px}
+.message{margin:8px 0;padding:12px 16px;border-radius:18px;max-width:85%;line-height:1.5}
+.message.user{background:var(--md-sys-color-primary-container);color:var(--md-sys-color-on-primary-container);margin-left:auto;border-bottom-right-radius:4px}
+.message.ai{background:var(--md-sys-color-surface-variant);color:var(--md-sys-color-on-surface}
+.message.system{background:transparent;text-align:center;color:var(--md-sys-color-on-surface-variant);font-size:.85rem}
 .input-area{display:flex;gap:8px;align-items:center}
-#chatInput{flex:1;padding:14px;border-radius:10px;border:none;background:#334155;color:#fff;font-size:1rem}
-.btn{padding:14px 20px;border:none;border-radius:10px;background:#3b82f6;color:#fff;font-size:1rem;cursor:pointer;transition:.2s}
-.btn:hover{background:#2563eb}.btn:active{transform:scale(.98)}
-.btn.icon{padding:14px;border-radius:50%;width:52px;height:52px;display:flex;align-items:center;justify-content:center;font-size:1.2rem}
-.btn.mic{background:#22c55e}.btn.mic.active{background:#ef4444;animation:pulse 1s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
-.devices-panel{width:320px;background:#1e293b;border-left:1px solid #334155;padding:16px;overflow-y:auto;display:none}
-.devices-panel.show{display:block}
-.device{background:#334155;border-radius:8px;padding:12px;margin:8px 0;display:flex;justify-content:space-between;align-items:center}
-.device-name{font-weight:600;font-size:.9rem}
-.device-state{font-size:.8rem;color:#94a3b8;margin-top:4px}
-.toggle{width:44px;height:24px;background:#475569;border-radius:12px;position:relative;cursor:pointer;transition:.3s}
-.toggle.on{background:#22c55e}
-.toggle::after{content:'';position:absolute;top:2px;left:2px;width:20px;height:20px;background:#fff;border-radius:50%;transition:.3s}
-.toggle.on::after{left:22px}
-.section-title{font-size:.85rem;font-weight:600;color:#94a3b8;margin:16px 0 8px;text-transform:uppercase;letter-spacing:.5px}
-.quick-actions{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
-.quick-btn{padding:6px 12px;border-radius:16px;background:#334155;border:none;color:#e2e8f0;font-size:.8rem;cursor:pointer}
-.quick-btn:hover{background:#475569}
-@media(max-width:768px){.main{flex-direction:column}.devices-panel{width:100%;height:200px;border-left:none;border-top:1px solid #334155}}
+.chat-input{flex:1;padding:14px 20px;border-radius:24px;border:none;background:var(--md-sys-color-surface-variant);color:var(--md-sys-color-on-surface);font-size:1rem;outline:none}
+.chat-input::placeholder{color:var(--md-sys-color-on-surface-variant)}
+/* Snackbar */
+.snackbar{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--md-sys-color-inverse-surface,#343036);color:var(--md-sys-color-inverse-on-surface,#F4EFF4);padding:14px 24px;border-radius:var(--md-shape-corner-full);box-shadow:var(--md-elevation-3);opacity:0;transition:all .3s;z-index:500;white-space:nowrap}
+.snackbar.show{opacity:1;transform:translateX(-50%) translateY(0)}
+/* Empty State */
+.empty-state{text-align:center;padding:48px 24px;color:var(--md-sys-color-on-surface-variant)}
+.empty-state .material-icons-round{font-size:48px;margin-bottom:16px;opacity:.5}
+.empty-state-title{font-size:1.25rem;font-weight:500;margin-bottom:8px}
+.empty-state-text{font-size:.9rem}
+/* Responsive */
+@media(max-width:768px){
+.main-content{flex-direction:column}
+.devices-panel{width:100%;position:fixed;top:0;left:0;right:0;bottom:0;border-left:none}
+.widgets-grid{grid-template-columns:repeat(2,1fr)}
+}
 </style>
 </head>
 <body>
-<div class="header">
-<h1>🏠 Smart Assistant <span id="badge" class="badge err">⏳</span></h1>
-<button class="btn" onclick="toggleDevices()">📋 Устройства</button>
+<!-- App Bar -->
+<div class="app-bar">
+<div class="app-bar-left">
+<span class="material-icons-round" style="color:var(--md-sys-color-primary)">home</span>
+<h1 class="app-title">Smart Home</h1>
+<span id="statusBadge" class="status-chip err">
+<span class="material-icons-round" style="font-size:14px">error</span>
+<span>Нет подключения</span>
+</span>
+</div>
+<div class="app-bar-actions">
+<button class="icon-btn" onclick="showChat()" title="Чат">
+<span class="material-icons-round">chat</span>
+</button>
+<button class="icon-btn primary" onclick="toggleDevicesPanel()" title="Все устройства">
+<span class="material-icons-round">devices</span>
+</button>
+</div>
 </div>
 
-<div class="main">
-<div class="chat-panel">
-<div class="quick-actions">
-<button class="quick-btn" onclick="quickCmd('Свет в гостиной')">💡 Свет</button>
-<button class="quick-btn" onclick="quickCmd('Розетки')">🔌 Розетки</button>
-<button class="quick-btn" onclick="quickCmd('Температура')">🌡 Климат</button>
-<button class="quick-btn" onclick="quickCmd('Шторы')">🪟 Шторы</button>
-<button class="quick-btn" onclick="quickCmd('Все устройства')">📊 Статус всех</button>
+<!-- Main Content -->
+<div class="main-content">
+<!-- Widgets Container (Main Screen) -->
+<div id="widgetsContainer" class="widgets-container show">
+<div id="widgetsGrid" class="widgets-grid"></div>
 </div>
+
+<!-- Devices Panel -->
+<div id="devicesPanel" class="devices-panel">
+<div class="panel-header">
+<span class="panel-title">📋 Все устройства</span>
+<button class="icon-btn" onclick="toggleDevicesPanel()">
+<span class="material-icons-round">close</span>
+</button>
+</div>
+<div id="deviceList" class="device-list"></div>
+</div>
+
+<!-- Chat Panel -->
+<div id="chatPanel" class="chat-panel">
 <div id="chatMessages" class="chat-messages"></div>
 <div class="input-area">
-<button id="micBtn" class="btn icon mic" onclick="toggleVoice()" title="Голосовой ввод">🎤</button>
-<input type="text" id="chatInput" placeholder="Спросите меня о чём угодно или управляйте устройствами..." onkeypress="if(event.key==='Enter')sendMessage()">
-<button class="btn" onclick="sendMessage()">➤</button>
+<button id="micBtn" class="icon-btn" onclick="toggleVoice()" title="Голосовой ввод">
+<span class="material-icons-round">mic</span>
+</button>
+<input type="text" id="chatInput" class="chat-input" placeholder="Спросите или управляйте устройствами..." onkeypress="if(event.key==='Enter')sendMessage()">
+<button class="icon-btn primary" onclick="sendMessage()">
+<span class="material-icons-round">send</span>
+</button>
+</div>
 </div>
 </div>
 
-<div id="devicesPanel" class="devices-panel">
-<div class="section-title">💡 Свет</div>
-<div id="lightsList"></div>
-<div class="section-title">🔌 Розетки</div>
-<div id="switchesList"></div>
-<div class="section-title">🌡 Климат</div>
-<div id="climateList"></div>
-<div class="section-title">🪟 Шторы</div>
-<div id="coversList"></div>
+<!-- FAB for Quick Add Widget -->
+<button id="fabAddWidget" class="fab" onclick="openAddWidgetDialog()" style="display:none">
+<span class="material-icons-round">add</span>
+</button>
+
+<!-- Bottom Sheet for Device List -->
+<div id="deviceSheet" class="bottom-sheet">
+<div class="sheet-handle"></div>
+<div class="sheet-header">
+<span class="sheet-title">Выберите устройство</span>
+<button class="icon-btn" onclick="closeDeviceSheet()">
+<span class="material-icons-round">close</span>
+</button>
+</div>
+<div id="sheetContent" class="sheet-content"></div>
+</div>
+
+<!-- Add Widget Dialog -->
+<div id="addWidgetDialog" class="dialog-overlay">
+<div class="dialog">
+<h2 class="dialog-title">Добавить виджет</h2>
+<p style="color:var(--md-sys-color-on-surface-variant);margin-bottom:16px">Выберите устройство для быстрого доступа</p>
+<div id="addWidgetList" style="max-height:300px;overflow-y:auto"></div>
+<div class="dialog-actions">
+<button class="btn-text" onclick="closeAddWidgetDialog()">Отмена</button>
 </div>
 </div>
+</div>
+
+<!-- Snackbar -->
+<div id="snackbar" class="snackbar"></div>
 
 <script>
 const $=id=>document.getElementById(id);
 let allDevices=[];
+let widgets=[];
 let isListening=false;
 let recognition=null;
 
-// Инициализация распознавания речи
+// Load widgets from localStorage
+function loadWidgets(){
+try{
+const saved=localStorage.getItem('home_widgets');
+widgets=saved?JSON.parse(saved):[];
+}catch(e){widgets=[];}
+renderWidgets();
+}
+
+function saveWidgets(){
+localStorage.setItem('home_widgets',JSON.stringify(widgets));
+}
+
+// Speech Recognition
 if('webkitSpeechRecognition' in window||'SpeechRecognition' in window){
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
 recognition=new SR();
@@ -96,13 +255,20 @@ if(e.results[i].isFinal)final+=e.results[i][0].transcript;
 }
 if(final){$('chatInput').value=final;sendMessage();}
 };
-recognition.onend=()=>{isListening=false;$('micBtn').classList.remove('active');};
-recognition.onerror=e=>{logMessage('❌ Ошибка голоса: '+e.error,'system');isListening=false;$('micBtn').classList.remove('active');};
+recognition.onend=()=>{isListening=false;$('micBtn').querySelector('span').textContent='mic';};
+recognition.onerror=e=>{showSnackbar('❌ Ошибка голоса: '+e.error);isListening=false;$('micBtn').querySelector('span').textContent='mic';};
 }
 
 function toggleVoice(){
-if(!recognition){alert('Голосовой ввод не поддерживается браузером');return;}
-if(isListening){recognition.stop();}else{recognition.start();isListening=true;$('micBtn').classList.add('active');}
+if(!recognition){showSnackbar('Голос не поддерживается');return;}
+if(isListening){recognition.stop();}else{recognition.start();isListening=true;$('micBtn').querySelector('span').textContent='mic_off';}
+}
+
+function showSnackbar(msg){
+const s=$('snackbar');
+s.textContent=msg;
+s.classList.add('show');
+setTimeout(()=>s.classList.remove('show'),3000);
 }
 
 function addMessage(text,type){
@@ -112,8 +278,6 @@ div.textContent=text;
 $('chatMessages').appendChild(div);
 $('chatMessages').scrollTop=$('chatMessages').scrollHeight;
 }
-
-function logMessage(text,type='system'){addMessage(text,type);}
 
 function quickCmd(cmd){
 $('chatInput').value=cmd;
@@ -125,69 +289,244 @@ const q=$('chatInput').value.trim();
 if(!q)return;
 $('chatInput').value='';
 addMessage(q,'user');
-addMessage('🤖 Думаю...','system');
+addMessage('🤔 Обрабатываю...','system');
 try{
-const r=await fetch('/api/ai/query',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:[{role:'user',content:q}],system_prompt:'Ты помощник умного дома. Ты можешь управлять устройствами через API. Отвечай кратко и по делу. Если просят включить/выключить устройство - используй вызов сервиса. Для получения статуса устройств используй API.'})});
+const r=await fetch('/api/ai/query',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:[{role:'user',content:q}],system_prompt:'Ты помощник умного дома. Отвечай кратко. Для управления устройствами вызывай API.'})});
 const data=await r.json();
 if(data.error){addMessage('❌ '+data.error,'ai');return;}
 const reply=data.choices?.[0]?.message?.content||JSON.stringify(data);
 addMessage(reply,'ai');
-if(q.toLowerCase().includes('статус')||q.toLowerCase().includes('состояние')){loadAllDevices();}
+if(q.toLowerCase().includes('статус')||q.toLowerCase().includes('список')){loadAllDevices();toggleDevicesPanel();}
 }catch(e){addMessage('❌ Ошибка: '+e.message,'ai');}
 }
 
+function showChat(){
+$('widgetsContainer').classList.remove('show');
+$('devicesPanel').classList.remove('show');
+$('chatPanel').classList.add('show');
+$('fabAddWidget').style.display='none';
+}
+
+function showWidgets(){
+$('chatPanel').classList.remove('show');
+$('devicesPanel').classList.remove('show');
+$('widgetsContainer').classList.add('show');
+$('fabAddWidget').style.display='flex';
+}
+
 async function doHealth(){
+try{
 const h=await fetch('/api/health').then(r=>r.json());
-$('badge').className='badge '+(h.status==='ok'?'ok':'err');
-$('badge').textContent=h.ha==='configured'?'✅ HA подключен':'❌ HA';
-if(h.ha==='configured'){loadAllDevices();addMessage('✅ Система готова. Чем могу помочь?','system');}
-else{addMessage('⚠️ Home Assistant не настроен','system');}
+const badge=$('statusBadge');
+if(h.status==='ok'&&h.ha==='configured'){
+badge.className='status-chip ok';
+badge.innerHTML='<span class="material-icons-round" style="font-size:14px">check_circle</span><span>HA подключен</span>';
+loadAllDevices();
+loadWidgets();
+showWidgets();
+showSnackbar('✅ Система готова');
+}else{
+badge.className='status-chip err';
+badge.innerHTML='<span class="material-icons-round" style="font-size:14px">error</span><span>Нет подключения к HA</span>';
+showSnackbar('⚠️ Проверьте настройки Home Assistant');
+}
+}catch(e){
+const badge=$('statusBadge');
+badge.className='status-chip err';
+badge.innerHTML='<span class="material-icons-round" style="font-size:14px">error</span><span>Ошибка соединения</span>';
+showSnackbar('❌ Ошибка: '+e.message);
+}
 }
 
 async function loadAllDevices(){
 try{
 const e=await fetch('/api/ha/entities').then(r=>r.json());
 if(!Array.isArray(e))return;
-allDevices=e;
-renderDevices('light',e.filter(d=>d.entity_id.startsWith('light.')));
-renderDevices('switch',e.filter(d=>d.entity_id.startsWith('switch.')));
-renderDevices('climate',e.filter(d=>d.entity_id.startsWith('climate.')));
-renderDevices('cover',e.filter(d=>d.entity_id.startsWith('cover.')));
-}catch(err){console.error(err);}
+allDevices=e.filter(d=>['light','switch','climate','cover','fan','lock'].some(domain=>d.entity_id.startsWith(domain+'.')));
+renderDeviceList();
+renderWidgets();
+}catch(err){console.error('Failed to load devices:',err);showSnackbar('❌ Не удалось загрузить устройства');}
 }
 
-function renderDevices(domain,devices){
-const container=$(domain+'List');
+function renderDeviceList(){
+const container=$('deviceList');
 if(!container)return;
 container.innerHTML='';
-if(!devices.length){container.innerHTML='<div style="color:#64748b;padding:8px;text-align:center">Нет устройств</div>';return;}
-devices.slice(0,20).forEach(dev=>{
-const div=document.createElement('div');
-div.className='device';
+const categories={
+light:{name:'💡 Освещение',icon:'lightbulb'},
+switch:{name:'🔌 Розетки и выключатели',icon:'power'},
+climate:{name:'🌡 Климат',icon:'thermostat'},
+cover:{name:'🪟 Шторы и жалюзи',icon:'blinds'},
+fan:{name:'💨 Вентиляция',icon:'fan'},
+lock:{name:'🔒 Замки',icon:'lock'}
+};
+for(const[domain,info]of Object.entries(categories)){
+const devices=allDevices.filter(d=>d.entity_id.startsWith(domain+'.'));
+if(devices.length===0)continue;
+const catDiv=document.createElement('div');
+catDiv.className='device-category';
+catDiv.innerHTML=`<div class="category-header"><span class="material-icons-round">${info.icon}</span>${info.name}</div>`;
+const listDiv=document.createElement('div');
+devices.slice(0,50).forEach(dev=>{
 const isOn=dev.state==='on'||dev.state==='open'||dev.state==='heating'||dev.state==='cooling';
-const supportsToggle=['light','switch'].includes(domain);
-div.innerHTML=`
-<div>
+const item=document.createElement('div');
+item.className='device-item';
+item.onclick=(e)=>{if(!e.target.closest('.device-action'))toggleDevice(dev.entity_id,item);};
+item.innerHTML=`
+<div class="device-info">
 <div class="device-name">${dev.attributes?.friendly_name||dev.entity_id}</div>
-<div class="device-state">${dev.state}${dev.attributes?.unit_of_measurement?' ('+dev.attributes.unit_of_measurement+')':''}</div>
+<div class="device-status">${getStateText(dev.state,domain)}${dev.attributes?.unit_of_measurement?' ('+dev.attributes.unit_of_measurement+')':''}</div>
 </div>
-${supportsToggle?`<div class="toggle ${isOn?'on':''}" onclick="toggleDevice('${dev.entity_id}',this)"></div>`:''}
+<div class="device-action">
+${canToggle(domain)?`<button class="icon-btn ${isOn?'primary':''}" onclick="toggleDevice('${dev.entity_id}',this.parentElement.parentElement)">
+<span class="material-icons-round">${isOn?'toggle_on':'toggle_off'}</span>
+</button>`:''}
+<span class="material-icons-round" style="color:var(--md-sys-color-on-surface-variant);font-size:20px">${getDeviceIcon(domain,isOn)}</span>
+</div>
 `;
-container.appendChild(div);
+listDiv.appendChild(item);
 });
+catDiv.appendChild(listDiv);
+container.appendChild(catDiv);
+}
+if(container.children.length===0){
+container.innerHTML='<div class="empty-state"><span class="material-icons-round">devices_off</span><div class="empty-state-title">Нет устройств</div><div class="empty-state-text">Устройства не найдены в Home Assistant</div></div>';
+}
 }
 
-function toggleDevices(){
-$('devicesPanel').classList.toggle('show');
+function getDeviceIcon(domain,isOn){
+const icons={light:'lightbulb',switch:'power',climate:'thermostat',cover:'blinds',fan:'fan',lock:'lock'};
+return icons[domain]||(isOn?'check_circle':'circle');
+}
+
+function getStateText(state,domain){
+const states={on:'Вкл',off:'Выкл',open:'Открыто',closed:'Закрыто',heating:'Нагрев',cooling:'Охлаждение',idle:'Ожидание',locked:'За locked',unlocked:'Открыт'};
+return states[state]||state;
+}
+
+function canToggle(domain){
+return['light','switch','fan','lock'].includes(domain);
+}
+
+function renderWidgets(){
+const grid=$('widgetsGrid');
+if(!grid)return;
+grid.innerHTML='';
+if(widgets.length===0){
+grid.innerHTML=`
+<div class="empty-state">
+<span class="material-icons-round">dashboard</span>
+<div class="empty-state-title">Главный экран пуст</div>
+<div class="empty-state-text">Нажмите + чтобы добавить виджеты устройств</div>
+</div>
+<div class="add-widget-btn" onclick="openAddWidgetDialog()">
+<span class="material-icons-round">add_circle</span>
+<span>Добавить виджет</span>
+</div>
+`;
+return;
+}
+widgets.forEach((w,idx)=>{
+const dev=allDevices.find(d=>d.entity_id===w.entityId);
+if(!dev)return;
+const isOn=dev.state==='on'||dev.state==='open'||dev.state==='heating';
+const card=document.createElement('div');
+card.className='widget-card'+(isOn?' active':'');
+card.innerHTML=`
+<div class="widget-toggle" onclick="event.stopPropagation();removeWidget(${idx})">
+<span class="material-icons-round" style="font-size:16px">remove</span>
+</div>
+<div class="widget-icon"><span class="material-icons-round">${getDeviceIcon(w.domain,isOn)}</span></div>
+<div>
+<div class="widget-name">${w.name||dev.attributes?.friendly_name||w.entityId}</div>
+<div class="widget-state">${getStateText(dev.state,w.domain)}</div>
+</div>
+`;
+card.onclick=()=>toggleDevice(w.entityId,card);
+grid.appendChild(card);
+});
+grid.innerHTML+='<div class="add-widget-btn" onclick="openAddWidgetDialog()"><span class="material-icons-round">add_circle</span><span>Ещё виджет</span></div>';
+}
+
+function openAddWidgetDialog(){
+const list=$('addWidgetList');
+list.innerHTML='';
+const categories=[
+{domain:'light',name:'💡 Освещение'},
+{domain:'switch',name:'🔌 Розетки'},
+{domain:'climate',name:'🌡 Климат'},
+{domain:'cover',name:'🪟 Шторы'},
+{domain:'fan',name:'💨 Вентиляция'},
+{domain:'lock',name:'🔒 Замки'}
+];
+categories.forEach(cat=>{
+const devices=allDevices.filter(d=>d.entity_id.startsWith(cat.domain+'.'));
+if(devices.length===0)return;
+const header=document.createElement('div');
+header.style.cssText='font-size:.75rem;font-weight:500;color:var(--md-sys-color-on-surface-variant);text-transform:uppercase;padding:12px 0 8px;border-bottom:1px solid var(--md-sys-color-surface-variant);margin-top:12px';
+header.textContent=cat.name;
+list.appendChild(header);
+devices.forEach(dev=>{
+const item=document.createElement('div');
+item.className='device-item';
+item.innerHTML=`
+<div class="device-info">
+<div class="device-name">${dev.attributes?.friendly_name||dev.entity_id}</div>
+<div class="device-status">${getStateText(dev.state,cat.domain)}</div>
+</div>
+<span class="material-icons-round" style="color:var(--md-sys-color-primary)">add_circle</span>
+`;
+item.onclick=()=>addWidget(dev);
+list.appendChild(item);
+});
+});
+$('addWidgetDialog').classList.add('show');
+}
+
+function closeAddWidgetDialog(){
+$('addWidgetDialog').classList.remove('show');
+}
+
+function addWidget(dev){
+if(widgets.some(w=>w.entityId===dev.entity_id)){
+showSnackbar('Устройство уже в виджетах');
+return;
+}
+widgets.push({entityId:dev.entity_id,domain:dev.entity_id.split('.')[0],name:dev.attributes?.friendly_name});
+saveWidgets();
+renderWidgets();
+closeAddWidgetDialog();
+showSnackbar('✅ Виджет добавлен');
+}
+
+function removeWidget(idx){
+widgets.splice(idx,1);
+saveWidgets();
+renderWidgets();
+showSnackbar('Виджет удалён');
+}
+
+function toggleDevicesPanel(){
+const panel=$('devicesPanel');
+panel.classList.toggle('show');
+$('widgetsContainer').classList.toggle('show');
+$('chatPanel').classList.remove('show');
+$('fabAddWidget').style.display=panel.classList.contains('show')?'none':'flex';
 }
 
 async function toggleDevice(entityId,el){
 const domain=entityId.split('.')[0];
+const service=domain==='lock'?(allDevices.find(d=>d.entity_id===entityId)?.state==='locked'?'unlock':'lock'):'toggle';
 try{
-const r=await fetch('/api/ha/call_service',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({domain,service:'toggle',data:{entity_id:entityId}})});
+const r=await fetch('/api/ha/call_service',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({domain,service,data:{entity_id:entityId}})});
 const data=await r.json();
-if(data?.status==='ok'){el.classList.toggle('on');setTimeout(()=>refreshDeviceState(entityId),500);}
-}catch(e){console.error(e);}
+if(data?.status==='ok'){
+setTimeout(()=>refreshDeviceState(entityId),500);
+setTimeout(()=>refreshDeviceState(entityId),1500);
+}else{
+showSnackbar('❌ Ошибка выполнения');
+}
+}catch(e){showSnackbar('❌ Ошибка: '+e.message);}
 }
 
 async function refreshDeviceState(entityId){
@@ -196,15 +535,17 @@ const state=await fetch(`/api/ha/entity/${entityId}`).then(r=>r.json());
 if(state){
 const dev=allDevices.find(d=>d.entity_id===entityId);
 if(dev)dev.state=state.state;
-const domain=entityId.split('.')[0];
-const devices=allDevices.filter(d=>d.entity_id.startsWith(domain+'.'));
-renderDevices(domain,devices);
+renderDeviceList();
+renderWidgets();
 }
 }catch(e){console.error(e);}
 }
 
+// Init
+loadWidgets();
 doHealth();
 setInterval(doHealth,60000);
+setInterval(()=>{if($('widgetsContainer').classList.contains('show'))loadAllDevices();},30000);
 </script>
 </body>
 </html>
