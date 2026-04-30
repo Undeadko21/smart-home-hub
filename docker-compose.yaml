@@ -1,7 +1,9 @@
 services:
   kiosk:
+    build:
+      context: .
+      dockerfile: Dockerfile
     image: smart-kiosk:latest
-    pull_policy: never
     container_name: ${COMPOSE_PROJECT_NAME:-smart-kiosk}
     restart: ${RESTART_POLICY:-unless-stopped}
     ports:
