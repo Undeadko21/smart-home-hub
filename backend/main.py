@@ -50,11 +50,28 @@ class HAClient:
         r = await self.client.get(f"{self.url}/api/states", headers=self.headers)
         r.raise_for_status()
         data = r.json()
-        return [e for e in data if e["entity_id"].startswith(f"{domain}.")] if domain else data
-    async def call_service(self, domain: str, service: str, data: Optional[Dict] = None) -> Dict:
-        r = await self.client.post(f"{self.url}/api/services/{domain}/{service}", headers=self.headers, json=data)
+        if domain:
+            return [e for e in data if e["entity_id"].startswith(f"{domain}.")]
+        return data
+    async def get_entity_state(self, entity_id: str) -> Optional[Dict]:
+        r = await self.client.get(f"{self.url}/api/states/{entity_id}", headers=self.headers)
+        if r.status_code == 404:
+            return None
         r.raise_for_status()
-        return {"status": "ok", "result": r.json()}
+        return r.json()
+    async def call_service(self, domain: str, service: str, data: Optional[Dict] = None, target: Optional[Dict] = None) -> Dict:
+        payload = {}
+        if data:
+            payload.update(data)
+        if target:
+            payload["target"] = target
+        r = await self.client.post(f"{self.url}/api/services/{domain}/{service}", headers=self.headers, json=payload)
+        r.raise_for_status()
+        return {"status": "ok", "result": r.json() if r.text else {}}
+    async def get_services(self) -> Dict:
+        r = await self.client.get(f"{self.url}/api/services", headers=self.headers)
+        r.raise_for_status()
+        return r.json()
 
 class DeepSeekClient:
     def __init__(self, api_key: str, db_path: Path):
@@ -164,15 +181,26 @@ def create_app():
     @limiter.limit("20/minute")
     async def update_config(request: Request, cfg: ConfigUpdate):
         set_config(cfg.key, cfg.value); return {"status":"saved"}
-    class HAService(BaseModel): domain: str; service: str; data: Optional[Dict] = None
+    class HAService(BaseModel): domain: str; service: str; data: Optional[Dict] = None; target: Optional[Dict] = None
     @app.post("/api/ha/call_service")
     @limiter.limit("30/minute")
     async def ha_call(request: Request, c: HAService):
-        return await app.state.ha.call_service(c.domain, c.service, c.data)
+        return await app.state.ha.call_service(c.domain, c.service, c.data, c.target)
     @app.get("/api/ha/entities")
     @limiter.limit("20/minute")
     async def ha_ent(request: Request, domain: Optional[str] = None):
         return await app.state.ha.get_entities(domain)
+    @app.get("/api/ha/entity/{entity_id}")
+    @limiter.limit("30/minute")
+    async def ha_entity_state(request: Request, entity_id: str):
+        state = await app.state.ha.get_entity_state(entity_id)
+        if state is None:
+            raise HTTPException(status_code=404, detail="Entity not found")
+        return state
+    @app.get("/api/ha/services")
+    @limiter.limit("20/minute")
+    async def ha_services(request: Request):
+        return await app.state.ha.get_services()
     class AIQuery(BaseModel): messages: List[Dict]; system_prompt: Optional[str] = None
     @app.post("/api/ai/query")
     @limiter.limit("10/minute")

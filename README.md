@@ -67,11 +67,56 @@ docker-compose up -d
 
 ## API
 
-Приложение предоставляет следующие конечные точки:
+### Home Assistant Integration
 
-- `GET /` — Статический веб-интерфейс
-- `GET /api/health` — Проверка здоровья сервиса
-- Другие API эндпоинты для взаимодействия с Home Assistant и AI
+| Endpoint | Method | Описание |
+|----------|--------|----------|
+| `/api/ha/entities` | GET | Получить все устройства или фильтровать по домену (light, switch, climate, cover и т.д.) |
+| `/api/ha/entity/{entity_id}` | GET | Получить состояние конкретного устройства |
+| `/api/ha/services` | GET | Получить список всех доступных сервисов HA |
+| `/api/ha/call_service` | POST | Вызвать сервис HA (domain, service, data, target) |
+
+**Примеры запросов:**
+
+```bash
+# Получить все устройства
+curl http://localhost:8080/api/ha/entities
+
+# Получить только лампы
+curl http://localhost:8080/api/ha/entities?domain=light
+
+# Получить состояние конкретного устройства
+curl http://localhost:8080/api/ha/entity/light.living_room
+
+# Включить свет
+curl -X POST http://localhost:8080/api/ha/call_service \
+  -H "Content-Type: application/json" \
+  -d '{"domain":"light","service":"turn_on","data":{"entity_id":"light.living_room"}}'
+
+# Переключить выключатель
+curl -X POST http://localhost:8080/api/ha/call_service \
+  -H "Content-Type: application/json" \
+  -d '{"domain":"switch","service":"toggle","data":{"entity_id":"switch.coffee_maker"}}'
+```
+
+### AI Integration
+
+| Endpoint | Method | Описание |
+|----------|--------|----------|
+| `/api/ai/query` | POST | Отправить запрос к AI-ассистенту |
+
+### Notifications
+
+| Endpoint | Method | Описание |
+|----------|--------|----------|
+| `/api/notify/test` | POST | Отправить тестовое уведомление |
+
+### System
+
+| Endpoint | Method | Описание |
+|----------|--------|----------|
+| `/api/health` | GET | Проверка здоровья сервиса |
+| `/api/config` | POST | Обновить конфигурацию |
 
 ## База данных
 
