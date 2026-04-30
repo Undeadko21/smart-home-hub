@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>Smart Kiosk</title>
+<style>
+body{margin:0;font-family:system-ui;background:#0f172a;color:#e2e8f0;min-height:100vh;padding:16px}
+.card{background:#1e293b;border-radius:16px;padding:20px;max-width:500px;margin:0 auto}
+h1{text-align:center;margin:0 0 16px}
+.btn{display:block;width:100%;padding:14px;margin:8px 0;border:none;border-radius:10px;background:#3b82f6;color:#fff;font-size:1rem;cursor:pointer}
+.btn:active{transform:scale(.98)}
+.btn.ok{background:#22c55e}.btn.warn{background:#f59e0b;color:#000}
+#out{background:#0f172a;border-radius:8px;padding:12px;margin-top:16px;font-family:monospace;font-size:.85rem;white-space:pre-wrap;max-height:200px;overflow:auto}
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:.75rem;margin-left:8px}
+.badge.ok{background:rgba(34,197,94,.2);color:#22c55e}.badge.err{background:rgba(239,68,68,.2);color:#ef4444}
+</style>
+</head>
+<body>
+<div class="card">
+<h1>🏠 Smart Kiosk <span id="badge" class="badge err">⏳</span></h1>
+
+<button class="btn" onclick="doHealth()">🩺 Статус</button>
+<button class="btn" onclick="doHA()">📋 Устройства</button>
+<button class="btn ok" onclick="doLight()">💡 Свет</button>
+<button class="btn" onclick="doAI()">🤖 AI</button>
+<button class="btn warn" onclick="doNotify()">🔔 Тест</button>
+
+<div id="aiBox" style="display:none;margin:12px 0">
+<input type="text" id="q" placeholder="Вопрос..." style="width:100%;padding:10px;border-radius:6px;border:none;background:#334155;color:#fff;margin-bottom:8px">
+<button class="btn" onclick="sendAI()">Отправить</button>
+</div>
+
+<pre id="out">Нажмите кнопку...</pre>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const log=m=>{const o=$('out');o.textContent+=(o.textContent?'\\n':'')+m;o.scrollTop=o.scrollHeight;};
+const api=(p,m='GET',b)=>fetch(p,{method:m,headers:{'Content-Type':'application/json'},body:b?JSON.stringify(b):null}).then(r=>r.json()).catch(e=>{log('❌ '+e.message);return null;});
+
+async function doHealth(){
+  log('🔄 Проверка...');
+  const h=await api('/api/health');
+  if(!h)return;
+  $('badge').className='badge '+(h.status==='ok'?'ok':'err');
+  $('badge').textContent=h.ha==='configured'?'🔌HA:OK':'🔌HA:—';
+  log('✅ Статус: '+h.status+' | HA: '+h.ha+' | AI: '+h.ai+' | DB: '+(h.db_writable?'OK':'ERR'));
+}
+
+async function doHA(){
+  log('🔄 Загрузка устройств...');
+  const e=await api('/api/ha/entities?domain=light');
+  if(!e||!Array.isArray(e)){log('❌ Нет ответа от HA');return;}
+  log('💡 Найдено: '+e.length);
+  e.slice(0,5).forEach(x=>log(' • '+x.entity_id+' = '+x.state));
+}
+
+async function doLight(){
+  log('🔄 Поиск ламп...');
+  const e=await api('/api/ha/entities?domain=light');
+  if(!e||!e.length){log('❌ Нет ламп в HA');return;}
+  const id=e[0].entity_id;
+  log('🔄 Переключаю: '+id);
+  const r=await api('/api/ha/call_service','POST',{domain:'light',service:'toggle',data:{entity_id:id}});
+  log(r?.status==='ok'?'✅ Успех':'⚠️ '+JSON.stringify(r));
+}
+
+function doAI(){
+  const b=$('aiBox');
+  b.style.display=b.style.display==='none'?'block':'none';
+  if(b.style.display==='block')$('q').focus();
+}
+
+async function sendAI(){
+  const q=$('q').value.trim();
+  if(!q)return;
+  $('q').value='';
+  log('👤 '+q);
+  log('🤖 Думаю...');
+  const r=await api('/api/ai/query','POST',{messages:[{role:'user',content:q}]});
+  if(!r)return;
+  if(r.error){log('❌ '+r.error);return;}
+  const a=r.choices?.[0]?.message?.content;
+  log('🤖 '+(a||JSON.stringify(r)));
+}
+
+async function doNotify(){
+  log('📬 Отправка...');
+  const r=await api('/api/notify/test','POST',{provider:'ntfy',title:'Kiosk',message:'Test '+new Date().toLocaleTimeString()});
+  log(r?.status==='queued'?'✅ В очереди':'⚠️ '+JSON.stringify(r));
+}
+
+// Авто-старт
+setTimeout(doHealth,300);
+if(document.documentElement.requestFullscreen)document.documentElement.requestFullscreen().catch(()=>{});
+</script>
+</body>
+</html>
