@@ -1,7 +1,14 @@
-# TrueNAS SCALE App Configuration
+# TrueNAS SCALE 25.10.1 Goldeye App Configuration
 
 train: community
 categories:
   - home-automation
   - productivity
 icon_url: "" # URL к иконке приложения (опционально)
+
+# TrueNAS SCALE version compatibility
+min_version: "25.10.1"
+max_version: "25.10.99"
+app_metadata:
+  type: docker-compose
+  compose_file: "docker-compose.yaml"

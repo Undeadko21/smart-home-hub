@@ -1,4 +1,4 @@
-# Smart Kiosk Configuration Questions for TrueNAS SCALE
+# Smart Kiosk Configuration Questions for TrueNAS SCALE 25.10.1 Goldeye
 
 groups:
   - name: "Basic Configuration"
@@ -62,3 +62,66 @@ groups:
         default: ""
         required: false
         masked: true
+
+  - name: "Docker Compose Settings"
+    description: "Настройки Docker Compose для TrueNAS SCALE 25.10.1"
+    questions:
+      - variable: "COMPOSE_PROJECT_NAME"
+        label: "Имя проекта Docker Compose"
+        description: "Имя проекта для Docker Compose (используется для именования контейнеров)"
+        type: string
+        default: "smart-kiosk"
+        required: true
+      
+      - variable: "RESTART_POLICY"
+        label: "Политика перезапуска"
+        description: "Политика перезапуска контейнера при сбоях"
+        type: choices
+        default: "unless-stopped"
+        required: true
+        choices:
+          - value: "always"
+            label: "Always (всегда)"
+          - value: "unless-stopped"
+            label: "Unless Stopped (если не остановлен)"
+          - value: "on-failure"
+            label: "On Failure (при ошибке)"
+          - value: "no"
+            label: "No (нет)"
+      
+      - variable: "ENABLE_HEALTHCHECK"
+        label: "Включить проверку здоровья"
+        description: "Активировать health check для мониторинга состояния контейнера"
+        type: boolean
+        default: true
+        required: true
+      
+      - variable: "LOG_DRIVER"
+        label: "Драйвер логирования"
+        description: "Драйвер для управления логами контейнера"
+        type: choices
+        default: "json-file"
+        required: true
+        choices:
+          - value: "json-file"
+            label: "JSON File (стандартный)"
+          - value: "journald"
+            label: "Journald (системный журнал)"
+          - value: "none"
+            label: "None (отключено)"
+      
+      - variable: "MAX_LOG_SIZE"
+        label: "Максимальный размер логов"
+        description: "Максимальный размер файла логов перед ротацией (например, 10m, 100m)"
+        type: string
+        default: "10m"
+        required: true
+      
+      - variable: "MAX_LOG_FILES"
+        label: "Количество файлов логов"
+        description: "Максимальное количество файлов логов для хранения"
+        type: int
+        default: 3
+        required: true
+        min: 1
+        max: 10
