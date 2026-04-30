@@ -9,9 +9,9 @@ keywords:
   - home-assistant
   - kiosk
   - ai-assistant
-home: https://github.com/YOUR_USERNAME/smart-kiosk
+home: https://github.com/Undeadko21/smart-home-hub
 sources:
-  - https://github.com/YOUR_USERNAME/smart-kiosk
+  - https://github.com/Undeadko21/smart-home-hub
 maintainers:
   - name: Developer
     email: dev@example.com

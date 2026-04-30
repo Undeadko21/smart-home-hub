@@ -25,7 +25,7 @@ chart/
 1. Откройте **Apps** → **Manage Catalogs** в интерфейсе TrueNAS
 2. Добавьте новый каталог:
    - **Name**: `smart-kiosk`
-   - **Repository URL**: `https://github.com/YOUR_USERNAME/smart-kiosk.git`
+   - **Repository URL**: `https://github.com/Undeadko21/smart-home-hub.git`
    - **Branch**: `main`
 3. Нажмите **Save** для добавления каталога
 4. Перейдите в **Apps** → **Discover Apps**
@@ -64,7 +64,7 @@ MAX_LOG_FILES: 3
 
 ```bash
 # Клонировать репозиторий
-git clone https://github.com/YOUR_USERNAME/smart-kiosk.git
+git clone https://github.com/Undeadko21/smart-home-hub.git
 cd smart-kiosk
 
 # Установить приложение с вашими значениями
