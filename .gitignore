@@ -1,4 +1,1 @@
-```
-__pycache__/
-*.pyc
-```
+Nothing should be ignored based on the provided file changes. The only file added is INSTALL.md, which is a documentation file and should not be ignored.
