@@ -9,12 +9,17 @@ keywords:
   - home-assistant
   - kiosk
   - ai-assistant
-home: https://github.com/example/smart-kiosk
+home: https://github.com/YOUR_USERNAME/smart-kiosk
 sources:
-  - https://github.com/example/smart-kiosk
+  - https://github.com/YOUR_USERNAME/smart-kiosk
 maintainers:
   - name: Developer
     email: dev@example.com
+
+# Installation from GitHub via YAML interface
+install_method: github
+github_repo: YOUR_USERNAME/smart-kiosk
+github_branch: main
 
 # TrueNAS SCALE 25.10.1 Goldeye specific settings
 kubeVersion: ">=1.25.0"
