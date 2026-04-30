@@ -1,6 +1,1 @@
-```yaml
-# Chart build outputs
-chart/templates/
-chart/charts/
-chart/.helmignore
-```
+Nothing should be ignored based on the provided file changes. The changes include only source/config files (`.yaml` files), which should not be added to .gitignore according to rule #6.
