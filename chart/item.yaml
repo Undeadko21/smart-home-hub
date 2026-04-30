@@ -9,6 +9,12 @@ icon_url: "" # URL к иконке приложения (опционально)
 # TrueNAS SCALE version compatibility
 min_version: "25.10.1"
 max_version: "25.10.99"
+
+# Git repository configuration for installation from GitHub
+git_repo: "https://github.com/YOUR_USERNAME/smart-kiosk.git"
+git_branch: "main"
+
+# Application type: helm (recommended) or docker-compose
 app_metadata:
-  type: docker-compose
-  compose_file: "docker-compose.yaml"
+  type: helm
+  helm_chart_path: "chart"
