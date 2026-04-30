@@ -2,17 +2,18 @@ services:
   kiosk:
     image: smart-kiosk:latest
     pull_policy: never
-    container_name: smart-kiosk
-    restart: unless-stopped
+    container_name: ${COMPOSE_PROJECT_NAME:-smart-kiosk}
+    restart: ${RESTART_POLICY:-unless-stopped}
     ports:
-      - "8080:8080"
+      - "${PORT:-8080}:8080"
     environment:
       DATA_DIR: /app/data
-      HA_TOKEN: ""
-      DEEPSEEK_KEY: ""
+      HA_URL: "${HA_URL:-}"
+      HA_TOKEN: "${HA_TOKEN:-}"
+      DEEPSEEK_KEY: "${DEEPSEEK_KEY:-}"
     volumes:
       - type: bind
-        source: /mnt/storage/Anatoliy/kiosk-data
+        source: ${DATA_PATH:-/mnt/data/smart-kiosk}
         target: /app/data
         bind:
           create_host_path: true
@@ -21,8 +22,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '1.0'
-          memory: 512M
+          cpus: '${CPU_LIMIT:-1.0}'
+          memory: ${MEMORY_LIMIT:-512M}
         reservations:
           cpus: '0.25'
           memory: 128M
@@ -32,8 +33,9 @@ services:
       timeout: 5s
       retries: 3
       start_period: 10s
+      disable: ${DISABLE_HEALTHCHECK:-false}
     logging:
-      driver: json-file
+      driver: ${LOG_DRIVER:-json-file}
       options:
-        max-size: "10m"
-        max-file: "3"
+        max-size: "${MAX_LOG_SIZE:-10m}"
+        max-file: "${MAX_LOG_FILES:-3}"
