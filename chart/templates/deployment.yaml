@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-kiosk
+  labels:
+    app.kubernetes.io/name: smart-kiosk
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: smart-kiosk
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: smart-kiosk
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      restartPolicy: Always
+      securityContext:
+        runAsUser: {{ .Values.securityContext.runAsUser }}
+        runAsGroup: {{ .Values.securityContext.runAsGroup }}
+        runAsNonRoot: {{ .Values.securityContext.runAsNonRoot }}
+      containers:
+        - name: kiosk
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.targetPort }}
+              protocol: TCP
+          env:
+            - name: DATA_DIR
+              value: {{ .Values.storage.containerPath }}
+            - name: HA_URL
+              value: {{ .Values.ha_url | default "" | quote }}
+            - name: HA_TOKEN
+              value: {{ .Values.ha_token | default "" | quote }}
+            - name: DEEPSEEK_KEY
+              value: {{ .Values.deepseek_key | default "" | quote }}
+          volumeMounts:
+            - name: data
+              mountPath: {{ .Values.storage.containerPath }}
+          resources:
+            limits:
+              cpu: {{ .Values.resources.limits.cpu }}
+              memory: {{ .Values.resources.limits.memory }}
+            requests:
+              cpu: {{ .Values.resources.requests.cpu }}
+              memory: {{ .Values.resources.requests.memory }}
+          securityContext:
+            allowPrivilegeEscalation: {{ .Values.securityContext.allowPrivilegeEscalation }}
+            readOnlyRootFilesystem: false
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+            successThreshold: 1
+      volumes:
+        - name: data
+          hostPath:
+            path: {{ .Values.storage.hostPath }}
+            type: DirectoryOrCreate

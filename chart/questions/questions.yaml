@@ -1,0 +1,64 @@
+# Smart Kiosk Configuration Questions for TrueNAS SCALE
+
+groups:
+  - name: "Basic Configuration"
+    description: "Основные настройки приложения"
+    questions:
+      - variable: "PORT"
+        label: "Порт приложения"
+        description: "Порт для доступа к веб-интерфейсу Smart Kiosk"
+        type: int
+        default: 8080
+        required: true
+        min: 1
+        max: 65535
+      
+      - variable: "DATA_PATH"
+        label: "Путь хранения данных"
+        description: "Директория на хосте для хранения базы данных, логов и кэша"
+        type: path
+        default: "/mnt/data/smart-kiosk"
+        required: true
+      
+      - variable: "CPU_LIMIT"
+        label: "Лимит CPU"
+        description: "Максимальное количество CPU ядер для использования"
+        type: string
+        default: "1.0"
+        required: true
+      
+      - variable: "MEMORY_LIMIT"
+        label: "Лимит памяти"
+        description: "Максимальный объем оперативной памяти (например, 512M, 1G)"
+        type: string
+        default: "512M"
+        required: true
+
+  - name: "Home Assistant Integration"
+    description: "Настройки интеграции с Home Assistant"
+    questions:
+      - variable: "HA_URL"
+        label: "Home Assistant URL"
+        description: "URL вашего сервера Home Assistant (например, http://192.168.1.100:8123)"
+        type: url
+        default: ""
+        required: false
+      
+      - variable: "HA_TOKEN"
+        label: "Home Assistant Token"
+        description: "Long-Lived Access Token для доступа к API Home Assistant"
+        type: password
+        default: ""
+        required: false
+        masked: true
+
+  - name: "AI Settings"
+    description: "Настройки AI ассистента"
+    questions:
+      - variable: "DEEPSEEK_KEY"
+        label: "DeepSeek API Key"
+        description: "API ключ для сервиса DeepSeek (AI ассистент)"
+        type: password
+        default: ""
+        required: false
+        masked: true
