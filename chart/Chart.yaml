@@ -1,0 +1,24 @@
+apiVersion: v2
+name: smart-kiosk
+description: Smart Kiosk - веб-приложение для умного дома с интеграцией Home Assistant и AI-ассистентом
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+keywords:
+  - smart-home
+  - home-assistant
+  - kiosk
+  - ai-assistant
+home: https://github.com/example/smart-kiosk
+sources:
+  - https://github.com/example/smart-kiosk
+maintainers:
+  - name: Developer
+    email: dev@example.com
+
+# TrueNAS SCALE specific settings
+kubeVersion: ">=1.20.0"
+annotations:
+  truecharts.org/category: home-automation
+  truecharts.org/type: app
+  minTrueNASScaleVersion: "22.02"

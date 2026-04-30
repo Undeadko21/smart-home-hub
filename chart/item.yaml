@@ -1,0 +1,7 @@
+# TrueNAS SCALE App Configuration
+
+train: community
+categories:
+  - home-automation
+  - productivity
+icon_url: "" # URL к иконке приложения (опционально)
