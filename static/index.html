@@ -5,167 +5,206 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
 <title>Smart Kiosk</title>
 <style>
-body{margin:0;font-family:system-ui;background:#0f172a;color:#e2e8f0;min-height:100vh;padding:16px}
-.card{background:#1e293b;border-radius:16px;padding:20px;max-width:500px;margin:0 auto}
-h1{text-align:center;margin:0 0 16px;font-size:1.4rem}
-.btn{display:block;width:100%;padding:14px;margin:8px 0;border:none;border-radius:10px;background:#3b82f6;color:#fff;font-size:1rem;cursor:pointer}
-.btn:active{transform:scale(.98)}
-.btn.ok{background:#22c55e}.btn.warn{background:#f59e0b;color:#000}.btn.purple{background:#a855f7}
-#out{background:#0f172a;border-radius:8px;padding:12px;margin-top:16px;font-family:monospace;font-size:.85rem;white-space:pre-wrap;max-height:200px;overflow:auto}
-.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:.75rem;margin-left:8px}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui;background:#0f172a;color:#e2e8f0;height:100vh;display:flex;flex-direction:column}
+.header{background:#1e293b;padding:12px 16px;display:flex;justify-content:space-between;align-items:center}
+h1{margin:0;font-size:1.2rem;display:flex;align-items:center;gap:8px}
+.badge{padding:4px 10px;border-radius:12px;font-size:.75rem}
 .badge.ok{background:rgba(34,197,94,.2);color:#22c55e}.badge.err{background:rgba(239,68,68,.2);color:#ef4444}
+.main{flex:1;display:flex;overflow:hidden}
+.chat-panel{flex:1;display:flex;flex-direction:column;padding:16px;max-width:800px;margin:0 auto;width:100%}
+.chat-messages{flex:1;overflow-y:auto;background:#1e293b;border-radius:12px;padding:16px;margin-bottom:12px}
+.message{margin:12px 0;padding:12px 16px;border-radius:12px;max-width:85%}
+.message.user{background:#3b82f6;margin-left:auto;border-bottom-right-radius:4px}
+.message.ai{background:#334155;border-bottom-left-radius:4px}
+.message.system{background:#1e293b;border:1px solid #475569;text-align:center;margin:8px auto;font-size:.85rem;color:#94a3b8}
+.input-area{display:flex;gap:8px;align-items:center}
+#chatInput{flex:1;padding:14px;border-radius:10px;border:none;background:#334155;color:#fff;font-size:1rem}
+.btn{padding:14px 20px;border:none;border-radius:10px;background:#3b82f6;color:#fff;font-size:1rem;cursor:pointer;transition:.2s}
+.btn:hover{background:#2563eb}.btn:active{transform:scale(.98)}
+.btn.icon{padding:14px;border-radius:50%;width:52px;height:52px;display:flex;align-items:center;justify-content:center;font-size:1.2rem}
+.btn.mic{background:#22c55e}.btn.mic.active{background:#ef4444;animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+.devices-panel{width:320px;background:#1e293b;border-left:1px solid #334155;padding:16px;overflow-y:auto;display:none}
+.devices-panel.show{display:block}
 .device{background:#334155;border-radius:8px;padding:12px;margin:8px 0;display:flex;justify-content:space-between;align-items:center}
-.device-name{font-weight:600}
-.device-state{font-size:.85rem;color:#94a3b8}
-.toggle{width:50px;height:28px;background:#475569;border-radius:14px;position:relative;cursor-pointer;transition:.3s}
+.device-name{font-weight:600;font-size:.9rem}
+.device-state{font-size:.8rem;color:#94a3b8;margin-top:4px}
+.toggle{width:44px;height:24px;background:#475569;border-radius:12px;position:relative;cursor:pointer;transition:.3s}
 .toggle.on{background:#22c55e}
-.toggle::after{content:'';position:absolute;top:2px;left:2px;width:24px;height:24px;background:#fff;border-radius:50%;transition:.3s}
-.toggle.on::after{left:24px}
-.section{margin:16px 0}
-.section-title{font-size:1rem;font-weight:600;margin-bottom:8px;color:#94a3b8}
-select,input{background:#334155;border:none;border-radius:6px;padding:8px;color:#fff;width:100%;box-sizing:border-box}
+.toggle::after{content:'';position:absolute;top:2px;left:2px;width:20px;height:20px;background:#fff;border-radius:50%;transition:.3s}
+.toggle.on::after{left:22px}
+.section-title{font-size:.85rem;font-weight:600;color:#94a3b8;margin:16px 0 8px;text-transform:uppercase;letter-spacing:.5px}
+.quick-actions{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.quick-btn{padding:6px 12px;border-radius:16px;background:#334155;border:none;color:#e2e8f0;font-size:.8rem;cursor:pointer}
+.quick-btn:hover{background:#475569}
+@media(max-width:768px){.main{flex-direction:column}.devices-panel{width:100%;height:200px;border-left:none;border-top:1px solid #334155}}
 </style>
 </head>
 <body>
-<div class="card">
-<h1>🏠 Smart Kiosk <span id="badge" class="badge err">⏳</span></h1>
-
-<button class="btn" onclick="doHealth()">🩺 Статус</button>
-<button class="btn purple" onclick="loadAllDevices()">📋 Все устройства</button>
-<button class="btn ok" onclick="showDomain('light')">💡 Свет</button>
-<button class="btn" onclick="showDomain('switch')">🔌 Розетки</button>
-<button class="btn" onclick="showDomain('climate')">🌡 Климат</button>
-<button class="btn" onclick="showDomain('cover')">🪟 Шторы</button>
-<button class="btn warn" onclick="doNotify()">🔔 Тест</button>
-
-<div id="deviceList" class="section" style="display:none"></div>
-
-<div id="aiBox" style="display:none;margin:12px 0">
-<input type="text" id="q" placeholder="Вопрос..." style="width:100%;padding:10px;border-radius:6px;border:none;background:#334155;color:#fff;margin-bottom:8px">
-<button class="btn" onclick="sendAI()">Отправить</button>
+<div class="header">
+<h1>🏠 Smart Assistant <span id="badge" class="badge err">⏳</span></h1>
+<button class="btn" onclick="toggleDevices()">📋 Устройства</button>
 </div>
 
-<pre id="out">Нажмите кнопку...</pre>
+<div class="main">
+<div class="chat-panel">
+<div class="quick-actions">
+<button class="quick-btn" onclick="quickCmd('Свет в гостиной')">💡 Свет</button>
+<button class="quick-btn" onclick="quickCmd('Розетки')">🔌 Розетки</button>
+<button class="quick-btn" onclick="quickCmd('Температура')">🌡 Климат</button>
+<button class="quick-btn" onclick="quickCmd('Шторы')">🪟 Шторы</button>
+<button class="quick-btn" onclick="quickCmd('Все устройства')">📊 Статус всех</button>
+</div>
+<div id="chatMessages" class="chat-messages"></div>
+<div class="input-area">
+<button id="micBtn" class="btn icon mic" onclick="toggleVoice()" title="Голосовой ввод">🎤</button>
+<input type="text" id="chatInput" placeholder="Спросите меня о чём угодно или управляйте устройствами..." onkeypress="if(event.key==='Enter')sendMessage()">
+<button class="btn" onclick="sendMessage()">➤</button>
+</div>
+</div>
+
+<div id="devicesPanel" class="devices-panel">
+<div class="section-title">💡 Свет</div>
+<div id="lightsList"></div>
+<div class="section-title">🔌 Розетки</div>
+<div id="switchesList"></div>
+<div class="section-title">🌡 Климат</div>
+<div id="climateList"></div>
+<div class="section-title">🪟 Шторы</div>
+<div id="coversList"></div>
+</div>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const log=m=>{const o=$('out');o.textContent+=(o.textContent?'\n':'')+m;o.scrollTop=o.scrollHeight;};
-const api=(p,m='GET',b)=>fetch(p,{method:m,headers:{'Content-Type':'application/json'},body:b?JSON.stringify(b):null}).then(r=>r.json()).catch(e=>{log('❌ '+e.message);return null;});
+let allDevices=[];
+let isListening=false;
+let recognition=null;
 
-let allDevices = [];
+// Инициализация распознавания речи
+if('webkitSpeechRecognition' in window||'SpeechRecognition' in window){
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+recognition=new SR();
+recognition.continuous=false;
+recognition.interimResults=true;
+recognition.lang='ru-RU';
+recognition.onresult=e=>{
+let final='';
+for(let i=e.resultIndex;i<e.results.length;i++){
+if(e.results[i].isFinal)final+=e.results[i][0].transcript;
+}
+if(final){$('chatInput').value=final;sendMessage();}
+};
+recognition.onend=()=>{isListening=false;$('micBtn').classList.remove('active');};
+recognition.onerror=e=>{logMessage('❌ Ошибка голоса: '+e.error,'system');isListening=false;$('micBtn').classList.remove('active');};
+}
+
+function toggleVoice(){
+if(!recognition){alert('Голосовой ввод не поддерживается браузером');return;}
+if(isListening){recognition.stop();}else{recognition.start();isListening=true;$('micBtn').classList.add('active');}
+}
+
+function addMessage(text,type){
+const div=document.createElement('div');
+div.className='message '+type;
+div.textContent=text;
+$('chatMessages').appendChild(div);
+$('chatMessages').scrollTop=$('chatMessages').scrollHeight;
+}
+
+function logMessage(text,type='system'){addMessage(text,type);}
+
+function quickCmd(cmd){
+$('chatInput').value=cmd;
+sendMessage();
+}
+
+async function sendMessage(){
+const q=$('chatInput').value.trim();
+if(!q)return;
+$('chatInput').value='';
+addMessage(q,'user');
+addMessage('🤖 Думаю...','system');
+try{
+const r=await fetch('/api/ai/query',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:[{role:'user',content:q}],system_prompt:'Ты помощник умного дома. Ты можешь управлять устройствами через API. Отвечай кратко и по делу. Если просят включить/выключить устройство - используй вызов сервиса. Для получения статуса устройств используй API.'})});
+const data=await r.json();
+if(data.error){addMessage('❌ '+data.error,'ai');return;}
+const reply=data.choices?.[0]?.message?.content||JSON.stringify(data);
+addMessage(reply,'ai');
+if(q.toLowerCase().includes('статус')||q.toLowerCase().includes('состояние')){loadAllDevices();}
+}catch(e){addMessage('❌ Ошибка: '+e.message,'ai');}
+}
 
 async function doHealth(){
-  log('🔄 Проверка...');
-  const h=await api('/api/health');
-  if(!h)return;
-  $('badge').className='badge '+(h.status==='ok'?'ok':'err');
-  $('badge').textContent=h.ha==='configured'?'🔌HA:OK':'🔌HA:—';
-  log('✅ Статус: '+h.status+' | HA: '+h.ha+' | AI: '+h.ai);
+const h=await fetch('/api/health').then(r=>r.json());
+$('badge').className='badge '+(h.status==='ok'?'ok':'err');
+$('badge').textContent=h.ha==='configured'?'✅ HA подключен':'❌ HA';
+if(h.ha==='configured'){loadAllDevices();addMessage('✅ Система готова. Чем могу помочь?','system');}
+else{addMessage('⚠️ Home Assistant не настроен','system');}
 }
 
 async function loadAllDevices(){
-  log('🔄 Загрузка всех устройств...');
-  const e=await api('/api/ha/entities');
-  if(!e||!Array.isArray(e)){log('❌ Нет ответа от HA');return;}
-  allDevices = e;
-  renderDeviceList(e);
-  log('✅ Найдено устройств: '+e.length);
+try{
+const e=await fetch('/api/ha/entities').then(r=>r.json());
+if(!Array.isArray(e))return;
+allDevices=e;
+renderDevices('light',e.filter(d=>d.entity_id.startsWith('light.')));
+renderDevices('switch',e.filter(d=>d.entity_id.startsWith('switch.')));
+renderDevices('climate',e.filter(d=>d.entity_id.startsWith('climate.')));
+renderDevices('cover',e.filter(d=>d.entity_id.startsWith('cover.')));
+}catch(err){console.error(err);}
 }
 
-function showDomain(domain){
-  if(!allDevices.length){
-    log('🔄 Сначала загрузите все устройства');
-    loadAllDevices().then(()=>filterByDomain(domain));
-  }else{
-    filterByDomain(domain);
-  }
+function renderDevices(domain,devices){
+const container=$(domain+'List');
+if(!container)return;
+container.innerHTML='';
+if(!devices.length){container.innerHTML='<div style="color:#64748b;padding:8px;text-align:center">Нет устройств</div>';return;}
+devices.slice(0,20).forEach(dev=>{
+const div=document.createElement('div');
+div.className='device';
+const isOn=dev.state==='on'||dev.state==='open'||dev.state==='heating'||dev.state==='cooling';
+const supportsToggle=['light','switch'].includes(domain);
+div.innerHTML=`
+<div>
+<div class="device-name">${dev.attributes?.friendly_name||dev.entity_id}</div>
+<div class="device-state">${dev.state}${dev.attributes?.unit_of_measurement?' ('+dev.attributes.unit_of_measurement+')':''}</div>
+</div>
+${supportsToggle?`<div class="toggle ${isOn?'on':''}" onclick="toggleDevice('${dev.entity_id}',this)"></div>`:''}
+`;
+container.appendChild(div);
+});
 }
 
-function filterByDomain(domain){
-  const filtered = allDevices.filter(d => d.entity_id.startsWith(domain + '.'));
-  renderDeviceList(filtered);
-  log('💡 Показано '+filtered.length+' устройств ['+domain+']');
+function toggleDevices(){
+$('devicesPanel').classList.toggle('show');
 }
 
-function renderDeviceList(devices){
-  const container = $('deviceList');
-  container.innerHTML = '';
-  container.style.display = 'block';
-  
-  if(!devices.length){
-    container.innerHTML = '<div style="padding:20px;text-align:center;color:#64748b">Нет устройств</div>';
-    return;
-  }
-  
-  devices.slice(0, 50).forEach(dev => {
-    const div = document.createElement('div');
-    div.className = 'device';
-    
-    const isOn = dev.state === 'on' || dev.state === 'open' || dev.state === 'heating' || dev.state === 'cooling';
-    const supportsToggle = ['light','switch'].some(d => dev.entity_id.startsWith(d + '.'));
-    
-    div.innerHTML = `
-      <div>
-        <div class="device-name">${dev.attributes?.friendly_name || dev.entity_id}</div>
-        <div class="device-state">${dev.state}${dev.attributes?.unit_of_measurement ? ' ('+dev.attributes.unit_of_measurement+')' : ''}</div>
-      </div>
-      ${supportsToggle ? `<div class="toggle ${isOn?'on':''}" onclick="toggleDevice('${dev.entity_id}', this)"></div>` : ''}
-    `;
-    container.appendChild(div);
-  });
-}
-
-async function toggleDevice(entityId, el){
-  const domain = entityId.split('.')[0];
-  log('🔄 Переключаю: '+entityId);
-  const r=await api('/api/ha/call_service','POST',{domain:domain,service:'toggle',data:{entity_id:entityId}});
-  if(r?.status==='ok'){
-    el.classList.toggle('on');
-    setTimeout(()=>refreshDeviceState(entityId), 500);
-  }
-  log(r?.status==='ok'?'✅ Успех':'⚠️ '+JSON.stringify(r));
+async function toggleDevice(entityId,el){
+const domain=entityId.split('.')[0];
+try{
+const r=await fetch('/api/ha/call_service',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({domain,service:'toggle',data:{entity_id:entityId}})});
+const data=await r.json();
+if(data?.status==='ok'){el.classList.toggle('on');setTimeout(()=>refreshDeviceState(entityId),500);}
+}catch(e){console.error(e);}
 }
 
 async function refreshDeviceState(entityId){
-  const state = await api(`/api/ha/entity/${entityId}`);
-  if(state){
-    const filtered = allDevices.filter(d => d.entity_id === entityId);
-    if(filtered.length) filtered[0].state = state.state;
-    if(state.attributes?.friendly_name) filtered[0].attributes = state.attributes;
-    const domain = entityId.split('.')[0];
-    filterByDomain(domain);
-  }
+try{
+const state=await fetch(`/api/ha/entity/${entityId}`).then(r=>r.json());
+if(state){
+const dev=allDevices.find(d=>d.entity_id===entityId);
+if(dev)dev.state=state.state;
+const domain=entityId.split('.')[0];
+const devices=allDevices.filter(d=>d.entity_id.startsWith(domain+'.'));
+renderDevices(domain,devices);
+}
+}catch(e){console.error(e);}
 }
 
-function doAI(){
-  const b=$('aiBox');
-  b.style.display=b.style.display==='none'?'block':'none';
-  if(b.style.display==='block')$('q').focus();
-}
-
-async function sendAI(){
-  const q=$('q').value.trim();
-  if(!q)return;
-  $('q').value='';
-  log('👤 '+q);
-  log('🤖 Думаю...');
-  const r=await api('/api/ai/query','POST',{messages:[{role:'user',content:q}]});
-  if(!r)return;
-  if(r.error){log('❌ '+r.error);return;}
-  const a=r.choices?.[0]?.message?.content;
-  log('🤖 '+(a||JSON.stringify(r)));
-}
-
-async function doNotify(){
-  log('📬 Отправка...');
-  const r=await api('/api/notify/test','POST',{provider:'ntfy',title:'Kiosk',message:'Test '+new Date().toLocaleTimeString()});
-  log(r?.status==='queued'?'✅ В очереди':'⚠️ '+JSON.stringify(r));
-}
-
-// Авто-старт
-setTimeout(doHealth,300);
-if(document.documentElement.requestFullscreen)document.documentElement.requestFullscreen().catch(()=>{});
+doHealth();
+setInterval(doHealth,60000);
 </script>
 </body>
 </html>
