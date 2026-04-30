@@ -1,1 +1,4 @@
-Nothing should be ignored in this case, as only a markdown documentation file (`INSTALL_IX_APP.md`) was added without any build artifacts, dependencies, or temporary files.
+```
+__pycache__/
+*.pyc
+```
