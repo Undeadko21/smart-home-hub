@@ -11,7 +11,7 @@ min_version: "25.10.1"
 max_version: "25.10.99"
 
 # Git repository configuration for installation from GitHub
-git_repo: "https://github.com/YOUR_USERNAME/smart-kiosk.git"
+git_repo: "https://github.com/Undeadko21/smart-home-hub.git"
 git_branch: "main"
 
 # Application type: helm (recommended) or docker-compose

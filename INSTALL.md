@@ -57,7 +57,7 @@ sudo ss -tlnp | grep :8080
 
 ```bash
 # 1. Клонируйте репозиторий
-git clone https://github.com/YOUR_USERNAME/smart-kiosk.git
+git clone https://github.com/Undeadko21/smart-home-hub.git
 cd smart-kiosk
 
 # 2. Создайте файл .env с вашими настройками
@@ -99,12 +99,12 @@ cd /opt/smart-kiosk
 #### Вариант А: Клонирование из Git (рекомендуется)
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/smart-kiosk.git .
+git clone https://github.com/Undeadko21/smart-home-hub.git .
 ```
 
 #### Вариант Б: Ручное скачивание
 
-1. Скачайте архив с GitHub: https://github.com/YOUR_USERNAME/smart-kiosk/archive/main.zip
+1. Скачайте архив с GitHub: https://github.com/Undeadko21/smart-home-hub/archive/main.zip
 2. Распакуйте в `/opt/smart-kiosk`
 3. Убедитесь, что файлы `docker-compose.yaml` и `Dockerfile` находятся в корне
 
@@ -579,7 +579,7 @@ sudo chmod 755 /var/lib/smart-kiosk/data
 - [Документация Docker Compose](https://docs.docker.com/compose/)
 - [Документация Home Assistant](https://www.home-assistant.io/docs/)
 - [DeepSeek API Documentation](https://platform.deepseek.com/docs)
-- [GitHub репозиторий проекта](https://github.com/YOUR_USERNAME/smart-kiosk)
+- [GitHub репозиторий проекта](https://github.com/Undeadko21/smart-home-hub)
 
 ---
 

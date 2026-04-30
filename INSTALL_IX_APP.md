@@ -20,7 +20,7 @@
 3. Нажмите **Add Catalog**
 4. Заполните форму:
    - **Name**: `smart-kiosk`
-   - **Repository URL**: `https://github.com/YOUR_USERNAME/smart-kiosk.git`
+   - **Repository URL**: `https://github.com/Undeadko21/smart-home-hub.git`
    - **Branch**: `main`
 5. Нажмите **Save**
 
@@ -171,7 +171,7 @@ MAX_LOG_FILES: 3
 
 ```bash
 # Клонировать репозиторий
-git clone https://github.com/YOUR_USERNAME/smart-kiosk.git
+git clone https://github.com/Undeadko21/smart-home-hub.git
 cd smart-kiosk
 
 # Установить приложение
