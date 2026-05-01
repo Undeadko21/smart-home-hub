@@ -3,12 +3,17 @@
     "step": {
       "user": {
         "title": "Smart Home Hub",
-        "description": "Настройте подключение к Smart Home Hub",
+        "description": "Настройте подключение к Smart Home Hub. Укажите URL backend (например, http://localhost) и порт (по умолчанию 8080). API ключ опционален.",
         "data": {
-          "host": "Хост (IP-адрес или домен)",
-          "port": "Порт"
+          "host": "Хост (URL backend, например http://localhost)",
+          "port": "Порт (по умолчанию 8080)",
+          "api_key": "API ключ (опционально)"
         }
       }
+    },
+    "error": {
+      "cannot_connect": "Не удалось подключиться к Smart Home Hub. Проверьте адрес и порт.",
+      "unknown": "Произошла неизвестная ошибка"
     },
     "abort": {
       "already_configured": "Устройство уже настроено"
@@ -18,8 +23,9 @@
     "step": {
       "init": {
         "data": {
-          "host": "Хост",
-          "port": "Порт"
+          "host": "Хост (URL backend)",
+          "port": "Порт",
+          "api_key": "API ключ"
         }
       }
     }

@@ -4,6 +4,7 @@ from homeassistant.components.sensor import SensorEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import DOMAIN
 
@@ -18,13 +19,63 @@ async def async_setup_entry(
     """Set up sensor platform."""
     _LOGGER.info("Setting up sensor platform for Smart Home Hub")
     
-    # Здесь можно добавить реальные сенсоры после подключения к устройству
-    # Пока добавляем тестовый сенсор для демонстрации
-    entities = [
-        SmartHomeHubSensor(entry.entry_id, "Test Sensor", "temperature", "°C")
-    ]
+    coordinator = hass.data[DOMAIN][entry.entry_id]["coordinator"]
+    
+    # Create sensors based on coordinator data
+    entities = []
+    
+    # Add a status sensor
+    entities.append(SmartHomeHubStatusSensor(coordinator, entry.entry_id))
     
     async_add_entities(entities)
+
+
+class SmartHomeHubStatusSensor(CoordinatorEntity, SensorEntity):
+    """Representation of a Smart Home Hub status sensor."""
+
+    def __init__(self, coordinator, entry_id: str):
+        """Initialize the sensor."""
+        super().__init__(coordinator)
+        self._entry_id = entry_id
+        self._name = "Connection Status"
+
+    @property
+    def unique_id(self):
+        """Return a unique ID."""
+        return f"{self._entry_id}_status"
+
+    @property
+    def name(self):
+        """Return the name of the sensor."""
+        return f"Smart Home Hub {self._name}"
+
+    @property
+    def state(self):
+        """Return the state of the sensor."""
+        if self.coordinator.data:
+            return self.coordinator.data.get("status", "unknown")
+        return "unknown"
+
+    @property
+    def extra_state_attributes(self):
+        """Return additional attributes."""
+        attrs = {}
+        if self.coordinator.data:
+            attrs["status"] = self.coordinator.data.get("status", "unknown")
+            attrs["error"] = self.coordinator.data.get("error")
+            attrs["entity_count"] = len(self.coordinator.data.get("entities", []))
+            attrs["host"] = self.coordinator.host
+            attrs["port"] = self.coordinator.port
+        return attrs
+
+    @property
+    def device_info(self):
+        """Return device info."""
+        return {
+            "identifiers": {(DOMAIN, self._entry_id)},
+            "name": "Smart Home Hub",
+            "manufacturer": "Smart Home Hub",
+        }
 
 
 class SmartHomeHubSensor(SensorEntity):
@@ -69,5 +120,5 @@ class SmartHomeHubSensor(SensorEntity):
 
     async def async_update(self):
         """Update the sensor state."""
-        # Здесь должна быть логика получения данных от устройства
-        self._state = 22.5  # Тестовое значение
+        # Here should be logic to get data from the device
+        self._state = 22.5  # Test value

@@ -3,9 +3,10 @@ from homeassistant import config_entries
 from homeassistant.core import callback
 from homeassistant.data_entry_flow import FlowResult
 import voluptuous as vol
+import httpx
 
 from . import DOMAIN
-from .const import CONF_HOST, CONF_PORT, DEFAULT_PORT
+from .const import CONF_HOST, CONF_PORT, DEFAULT_PORT, CONF_API_KEY
 
 
 class SmartHomeHubConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
@@ -18,12 +19,38 @@ class SmartHomeHubConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors = {}
 
         if user_input is not None:
-            return self.async_create_entry(title="Smart Home Hub", data=user_input)
+            # Validate connection
+            host = user_input.get(CONF_HOST, "")
+            port = user_input.get(CONF_PORT, DEFAULT_PORT)
+            api_key = user_input.get(CONF_API_KEY, "")
+            
+            base_url = f"{host.rstrip('/')}:{port}"
+            
+            try:
+                async with httpx.AsyncClient(timeout=5) as client:
+                    headers = {}
+                    if api_key:
+                        headers["Authorization"] = f"Bearer {api_key}"
+                    
+                    response = await client.get(f"{base_url}/api/health", headers=headers)
+                    if response.status_code == 200:
+                        return self.async_create_entry(title="Smart Home Hub", data=user_input)
+                    else:
+                        errors["base"] = "cannot_connect"
+            except httpx.HTTPError:
+                errors["base"] = "cannot_connect"
+            except Exception:
+                errors["base"] = "unknown"
+            
+            # Only create entry if no errors
+            if not errors:
+                return self.async_create_entry(title="Smart Home Hub", data=user_input)
 
         data_schema = vol.Schema(
             {
-                vol.Required(CONF_HOST): str,
+                vol.Required(CONF_HOST, default="http://localhost"): str,
                 vol.Optional(CONF_PORT, default=DEFAULT_PORT): int,
+                vol.Optional(CONF_API_KEY, default=""): str,
             }
         )
 
@@ -47,4 +74,13 @@ class OptionsFlow(config_entries.OptionsFlow):
         """Handle a flow initialized by the user."""
         if user_input is not None:
             return self.async_create_entry(title="", data=user_input)
-        return self.async_show_form(step_id="user")
+        
+        data_schema = vol.Schema(
+            {
+                vol.Required(CONF_HOST, default=self.config_entry.data.get(CONF_HOST, "")): str,
+                vol.Optional(CONF_PORT, default=self.config_entry.data.get(CONF_PORT, DEFAULT_PORT)): int,
+                vol.Optional(CONF_API_KEY, default=self.config_entry.data.get(CONF_API_KEY, "")): str,
+            }
+        )
+        
+        return self.async_show_form(step_id="user", data_schema=data_schema)
