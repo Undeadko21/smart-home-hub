@@ -51,20 +51,26 @@ sudo ss -tlnp | grep :8080
 
 ---
 
-## 🚀 Быстрая установка (3 команды)
+## 🚀 Быстрая установка (1 команда)
 
-Для опытных пользователей, которые хотят быстро развернуть приложение:
+Для опытных пользователей — **полная установка одной командой**:
 
 ```bash
-# 1. Клонируйте репозиторий
-git clone https://github.com/Undeadko21/smart-home-hub.git
-cd smart-kiosk
-
-# 2. Создайте файл .env с вашими настройками
-cp .env.example .env && nano .env
-
-# 3. Запустите приложение
-docker compose up -d
+mkdir -p /opt/smart-kiosk && cd /opt/smart-kiosk && git clone https://github.com/Undeadko21/smart-home-hub.git . && cat > .env << 'EOF' && docker compose up -d --build
+PORT=8080
+DATA_PATH=/var/lib/smart-kiosk/data
+HA_URL=
+HA_TOKEN=
+DEEPSEEK_KEY=
+CPU_LIMIT=1.0
+MEMORY_LIMIT=512M
+RESTART_POLICY=unless-stopped
+COMPOSE_PROJECT_NAME=smart-kiosk
+DISABLE_HEALTHCHECK=false
+LOG_DRIVER=json-file
+MAX_LOG_SIZE=10m
+MAX_LOG_FILES=3
+EOF
 ```
 
 Приложение будет доступно по адресу: `http://localhost:8080`
@@ -190,31 +196,15 @@ MAX_LOG_FILES=3
 
 ---
 
-### Шаг 4: Создание Docker-образа
+### Шаг 4: Создание Docker-образа и запуск
 
-Соберите Docker-образ из исходного кода:
-
-```bash
-docker build -t smart-kiosk:latest .
-```
-
-Процесс сборки займёт 2-5 минут. После завершения вы увидите:
-
-```
-Successfully tagged smart-kiosk:latest
-```
-
-> **Примечание:** Если вы используете готовый образ из реестра, этот шаг можно пропустить. В этом случае измените `pull_policy: never` на `pull_policy: always` в файле `docker-compose.yaml`.
-
----
-
-### Шаг 5: Запуск приложения
-
-Запустите приложение в фоновом режиме:
+Соберите Docker-образ и запустите приложение одной командой:
 
 ```bash
-docker compose up -d
+docker compose up -d --build
 ```
+
+Процесс сборки займёт 2-5 минут.
 
 Вы увидите вывод:
 
@@ -226,7 +216,7 @@ docker compose up -d
 
 ---
 
-### Шаг 6: Проверка установки
+### Шаг 5: Проверка установки
 
 #### Проверка статуса контейнера
 
@@ -330,17 +320,11 @@ docker compose restart
 ### Обновление приложения
 
 ```bash
-# 1. Перейдите в директорию приложения
+# Перейдите в директорию приложения
 cd /opt/smart-kiosk
 
-# 2. Обновите исходный код из Git
-git pull origin main
-
-# 3. Пересоберите образ
-docker build -t smart-kiosk:latest .
-
-# 4. Пересоздайте контейнер
-docker compose up -d --force-recreate
+# Обновите исходный код, пересоберите образ и пересоздайте контейнер
+git pull origin main && docker compose up -d --build --force-recreate
 ```
 
 ### Полная остановка и удаление

@@ -55,16 +55,16 @@ Smart Kiosk — это легковесное веб-приложение для
 
 ### Быстрая установка (рекомендуется)
 
-Запустите скрипт автоматической установки:
+Запустите скрипт автоматической установки **одной командой**:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/your-repo/smart-kiosk/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Undeadko21/smart-home-hub/main/install.sh | bash
 ```
 
 Или скачайте и запустите вручную:
 
 ```bash
-wget https://raw.githubusercontent.com/your-repo/smart-kiosk/main/install.sh
+wget https://raw.githubusercontent.com/Undeadko21/smart-home-hub/main/install.sh
 chmod +x install.sh
 ./install.sh
 ```
