@@ -53,7 +53,29 @@ Smart Kiosk — это легковесное веб-приложение для
 
 ## Установка и запуск
 
-### Через Docker Compose (рекомендуется)
+### Быстрая установка (рекомендуется)
+
+Запустите скрипт автоматической установки:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/your-repo/smart-kiosk/main/install.sh | bash
+```
+
+Или скачайте и запустите вручную:
+
+```bash
+wget https://raw.githubusercontent.com/your-repo/smart-kiosk/main/install.sh
+chmod +x install.sh
+./install.sh
+```
+
+Скрипт автоматически:
+- Проверит наличие Docker и Docker Compose
+- Создаст директорию для данных
+- Создаст файл `.env` с настройками по умолчанию
+- Соберёт и запустит контейнер
+
+### Через Docker Compose (вручную)
 
 1. Отредактируйте `docker-compose.yaml` при необходимости:
    - Укажите путь к директории данных в `volumes`
@@ -61,7 +83,7 @@ Smart Kiosk — это легковесное веб-приложение для
 
 2. Запустите контейнер:
 ```bash
-docker-compose up -d
+docker compose up -d --build
 ```
 
 3. Приложение будет доступно по адресу: `http://localhost:8080`
