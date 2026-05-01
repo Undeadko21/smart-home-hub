@@ -48,9 +48,9 @@ class SmartHomeHubConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         data_schema = vol.Schema(
             {
-                vol.Required(CONF_HOST, default="http://localhost"): str,
-                vol.Optional(CONF_PORT, default=DEFAULT_PORT): int,
-                vol.Optional(CONF_API_KEY, default=""): str,
+                vol.Required(CONF_HOST, default="http://localhost", description="URL адрес backend сервера (например, http://localhost или http://192.168.1.100)"): str,
+                vol.Optional(CONF_PORT, default=DEFAULT_PORT, description="Порт для подключения к backend серверу (по умолчанию 8080)"): int,
+                vol.Optional(CONF_API_KEY, default="", description="API ключ для авторизации (оставьте пустым, если не требуется)"): str,
             }
         )
 
@@ -77,9 +77,9 @@ class OptionsFlow(config_entries.OptionsFlow):
         
         data_schema = vol.Schema(
             {
-                vol.Required(CONF_HOST, default=self.config_entry.data.get(CONF_HOST, "")): str,
-                vol.Optional(CONF_PORT, default=self.config_entry.data.get(CONF_PORT, DEFAULT_PORT)): int,
-                vol.Optional(CONF_API_KEY, default=self.config_entry.data.get(CONF_API_KEY, "")): str,
+                vol.Required(CONF_HOST, default=self.config_entry.data.get(CONF_HOST, ""), description="URL адрес backend сервера (например, http://localhost или http://192.168.1.100)"): str,
+                vol.Optional(CONF_PORT, default=self.config_entry.data.get(CONF_PORT, DEFAULT_PORT), description="Порт для подключения к backend серверу (по умолчанию 8080)"): int,
+                vol.Optional(CONF_API_KEY, default=self.config_entry.data.get(CONF_API_KEY, ""), description="API ключ для авторизации (оставьте пустым, если не требуется)"): str,
             }
         )
         
