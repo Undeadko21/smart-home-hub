@@ -1,0 +1,27 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Smart Home Hub",
+        "description": "Настройте подключение к Smart Home Hub",
+        "data": {
+          "host": "Хост (IP-адрес или домен)",
+          "port": "Порт"
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "Устройство уже настроено"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "host": "Хост",
+          "port": "Порт"
+        }
+      }
+    }
+  }
+}
