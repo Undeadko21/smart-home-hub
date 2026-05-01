@@ -1,3 +1,2 @@
-# Documentation and source files only - no build artifacts or dependencies detected
-
-The changes consist only of documentation files (.md) which should not be ignored. No compiled files, dependencies, or temporary files are present in the changeset.
+# Documentation and markdown files only - no build artifacts or dependencies detected
+# No gitignore rules needed for this project based on the file changes
