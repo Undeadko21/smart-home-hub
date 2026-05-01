@@ -23,9 +23,18 @@ Smart Kiosk — это легковесное веб-приложение для
 │   └── start.sh          # Скрипт запуска
 ├── static/
 │   └── index.html        # Веб-интерфейс
+├── chart/                # Helm chart для Kubernetes/TrueNAS
+│   ├── Chart.yaml
+│   ├── values.yaml
+│   ├── templates/
+│   └── questions/
 ├── Dockerfile            # Docker-образ приложения
 ├── docker-compose.yaml   # Конфигурация Docker Compose
-└── README.md             # Этот файл
+├── README.md             # Этот файл
+├── INSTALL.md            # Общая инструкция по установке
+├── INSTALL_PROXMOX.md    # Инструкция для Proxmox VE
+├── INSTALL_IX_APP.md     # Инструкция для TrueNAS Apps
+└── INSTALL_TRUENAS.md    # Инструкция для TrueNAS через терминал
 ```
 
 ## Технологии
@@ -56,6 +65,17 @@ docker-compose up -d
 ```
 
 3. Приложение будет доступно по адресу: `http://localhost:8080`
+
+### Установка на Proxmox VE
+
+Для установки на Proxmox VE (LXC контейнер или VM) следуйте инструкции:
+- [INSTALL_PROXMOX.md](INSTALL_PROXMOX.md) - Полная инструкция по установке на Proxmox
+
+### Установка на TrueNAS SCALE
+
+Для установки на TrueNAS SCALE следуйте инструкциям:
+- [INSTALL_IX_APP.md](INSTALL_IX_APP.md) - Установка через интерфейс Apps
+- [INSTALL_TRUENAS.md](INSTALL_TRUENAS.md) - Установка через терминал
 
 ### Переменные окружения
 
@@ -110,6 +130,15 @@ Endpoint: `GET http://localhost:8080/api/health`
 - Запуск от непривилегированного пользователя (UID 1000)
 - `no-new-privileges` security option
 - Rate limiting для API endpoints
+
+## Поддерживаемые платформы
+
+- **Docker/Docker Compose** - Универсальный способ для любой ОС с поддержкой Docker
+- **Proxmox VE** - LXC контейнеры и виртуальные машины (см. [INSTALL_PROXMOX.md](INSTALL_PROXMOX.md))
+- **TrueNAS SCALE** - Установка через Apps или терминал (см. [INSTALL_IX_APP.md](INSTALL_IX_APP.md), [INSTALL_TRUENAS.md](INSTALL_TRUENAS.md))
+- **Kubernetes** - Через Helm chart в директории `chart/`
+
+---
 
 ## Лицензия
 

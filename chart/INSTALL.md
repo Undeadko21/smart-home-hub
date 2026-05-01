@@ -1,24 +1,62 @@
-# Smart Kiosk - Установка из GitHub через YAML интерфейс
+# Smart Kiosk - Helm Chart для Kubernetes/TrueNAS SCALE
 
-Приложение Smart Kiosk для TrueNAS SCALE с установкой напрямую из GitHub репозитория.
+Приложение Smart Kiosk для Kubernetes и TrueNAS SCALE с установкой через Helm.
 
 ## Структура
 
 ```
 chart/
-├── Chart.yaml           # Метаданные chart с GitHub конфигурацией
+├── Chart.yaml           # Метаданные chart 
 ├── values.yaml          # Значения по умолчанию
 ├── README.md            # Документация для пользователей
-├── item.yaml            # Конфигурация для каталога TrueNAS с git_repo
+├── item.yaml            # Конфигурация для каталога TrueNAS
 ├── questions/
-│   └── questions.yaml   # Вопросы для интерфейса установки
+│   └── questions.yaml   # Вопросы для интерфейса установки TrueNAS
 └── templates/
     ├── deployment.yaml  # Kubernetes Deployment
     ├── service.yaml     # Kubernetes Service
     └── pvc.yaml         # PersistentVolumeClaim и PersistentVolume
 ```
 
-## Установка из GitHub через YAML интерфейс (рекомендуется)
+## Установка на Kubernetes
+
+### Вариант 1: Через Helm CLI
+
+```bash
+# Клонировать репозиторий
+git clone https://github.com/Undeadko21/smart-home-hub.git
+cd smart-home-hub/chart
+
+# Установить приложение
+helm install smart-kiosk . \
+  --namespace ix-smart-kiosk \
+  --create-namespace
+```
+
+### Вариант 2: С кастомными значениями
+
+Создайте файл `custom-values.yaml`:
+
+```yaml
+ha_url: "http://192.168.1.100:8123"
+ha_token: "your_long_lived_token"
+deepseek_key: "your_deepseek_api_key"
+
+service:
+  type: LoadBalancer
+  port: 8080
+
+storage:
+  hostPath: "/mnt/data/smart-kiosk"
+```
+
+Установите с кастомными значениями:
+
+```bash
+helm install smart-kiosk . -f custom-values.yaml --namespace ix-smart-kiosk --create-namespace
+```
+
+## Установка на TrueNAS SCALE
 
 ### Вариант 1: Через веб-интерфейс TrueNAS SCALE
 
@@ -33,99 +71,66 @@ chart/
 6. Настройте параметры через веб-форму
 7. Нажмите **Install**
 
-### Вариант 2: Установка через YAML файл
-
-Создайте файл `smart-kiosk-values.yaml` с вашими настройками:
-
-```yaml
-# Базовые настройки
-PORT: 8080
-DATA_PATH: "/mnt/data/smart-kiosk"
-CPU_LIMIT: "1.0"
-MEMORY_LIMIT: "512M"
-
-# Home Assistant
-HA_URL: "http://192.168.1.100:8123"
-HA_TOKEN: "your_long_lived_token"
-
-# AI настройки
-DEEPSEEK_KEY: "your_deepseek_api_key"
-
-# Docker Compose настройки
-COMPOSE_PROJECT_NAME: "smart-kiosk"
-RESTART_POLICY: "unless-stopped"
-ENABLE_HEALTHCHECK: true
-LOG_DRIVER: "json-file"
-MAX_LOG_SIZE: "10m"
-MAX_LOG_FILES: 3
-```
-
-Затем установите приложение через CLI:
+### Вариант 2: Через Helm CLI на TrueNAS
 
 ```bash
 # Клонировать репозиторий
 git clone https://github.com/Undeadko21/smart-home-hub.git
-cd smart-kiosk
+cd smart-home-hub/chart
 
-# Установить приложение с вашими значениями
-helm install smart-kiosk ./chart \
-  --namespace ix-smart-kiosk \
-  --create-namespace \
-  -f smart-kiosk-values.yaml
-```
-
-### Вариант 3: Прямая установка из GitHub
-
-```bash
-# Установка напрямую из GitHub репозитория
-helm install smart-kiosk \
-  oci://ghcr.io/YOUR_USERNAME/smart-kiosk-chart \
-  --namespace ix-smart-kiosk \
-  --create-namespace
-```
-
-Или используя git как источник:
-
-```bash
-# Добавить Helm репозиторий из GitHub
-helm repo add smart-kiosk https://YOUR_USERNAME.github.io/smart-kiosk
-
-# Обновить репозиторий
-helm repo update
+# Создать файл значений
+cat > values-custom.yaml << EOF
+ha_url: "http://192.168.1.100:8123"
+ha_token: "your_token"
+deepseek_key: "your_api_key"
+EOF
 
 # Установить приложение
-helm install smart-kiosk smart-kiosk/smart-kiosk \
+helm install smart-kiosk . \
   --namespace ix-smart-kiosk \
-  --create-namespace
+  --create-namespace \
+  -f values-custom.yaml
 ```
 
 ## Обновление версии
 
 Для обновления версии приложения:
 
-1. Измените версию в `Chart.yaml`:
-   ```yaml
-   version: 1.0.1  # увеличьте версию
-   appVersion: "1.0.1"
-   ```
+```bash
+# Перейдите в директорию chart
+cd smart-home-hub/chart
 
-2. В TrueNAS SCALE:
-   - Перейдите в **Apps** → **Installed Apps**
-   - Выберите **Smart Kiosk**
-   - Нажмите **Update** если доступна новая версия
+# Обновите код из репозитория
+git pull
 
-## Добавление в каталог TrueNAS
+# Обновите релиз
+helm upgrade smart-kiosk . --namespace ix-smart-kiosk
+```
 
-Для добавления приложения в официальный или community каталог:
+## Переменные окружения
 
-1. Создайте репозиторий с chart
-2. Добавьте URL репозитория в настройки TrueNAS (**Apps** → **Manage Catalogs**)
-3. Приложение появится в разделе **Discover Apps**
+| Переменная | Описание | Значение по умолчанию |
+|------------|----------|----------------------|
+| `DATA_DIR` | Директория данных | `/app/data` |
+| `HA_URL` | Home Assistant URL | `` |
+| `HA_TOKEN` | Home Assistant токен | `` |
+| `DEEPSEEK_KEY` | DeepSeek API ключ | `` |
 
-Формат репозитория должен соответствовать требованиям TrueNAS SCALE:
-- `item.yaml` с категориями
-- `questions/questions.yaml` с формой настройки
-- `templates/` с Kubernetes манифестами
+## Управление релизом
+
+```bash
+# Проверка статуса
+helm status smart-kiosk -n ix-smart-kiosk
+
+# Просмотр логов
+kubectl logs -n ix-smart-kiosk -l app.kubernetes.io/name=smart-kiosk -f
+
+# Масштабирование (не рекомендуется, приложение stateful)
+helm upgrade smart-kiosk . --set replicaCount=2 -n ix-smart-kiosk
+
+# Удаление
+helm uninstall smart-kiosk -n ix-smart-kiosk
+```
 
 ## Тестирование локально
 
@@ -143,19 +148,11 @@ helm status test-release -n test
 helm uninstall test-release -n test
 ```
 
-## Переменные окружения
-
-| Переменная | Описание | Значение по умолчанию |
-|------------|----------|----------------------|
-| `DATA_DIR` | Директория данных | `/app/data` |
-| `HA_URL` | Home Assistant URL | `` |
-| `HA_TOKEN` | Home Assistant токен | `` |
-| `DEEPSEEK_KEY` | DeepSeek API ключ | `` |
-
 ## Поддержка
 
+- Версия Kubernetes: >= 1.25.0
+- Версия Helm: 3.x
 - Версия TrueNAS SCALE: 22.02+
-- Kubernetes: встроенный в TrueNAS
 
 ## Лицензия
 
