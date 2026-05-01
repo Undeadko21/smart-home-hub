@@ -19,7 +19,37 @@
 
 ## Установка через терминал TrueNAS
 
-### Шаг 1: Подготовка директории
+### Быстрая установка (одна команда)
+
+Подключитесь к TrueNAS по SSH и выполните:
+
+```bash
+mkdir -p /mnt/data/apps/smart-kiosk && cd /mnt/data/apps/smart-kiosk && git clone https://github.com/Undeadko21/smart-home-hub.git . && cat > .env << 'EOF' && docker compose up -d --build
+PORT=8080
+DATA_PATH=/mnt/data/smart-kiosk
+HA_URL=
+HA_TOKEN=
+DEEPSEEK_KEY=
+CPU_LIMIT=1.0
+MEMORY_LIMIT=512M
+RESTART_POLICY=unless-stopped
+COMPOSE_PROJECT_NAME=smart-kiosk
+DISABLE_HEALTHCHECK=false
+LOG_DRIVER=json-file
+MAX_LOG_SIZE=10m
+MAX_LOG_FILES=3
+EOF
+```
+
+После выполнения приложение будет доступно по адресу: `http://<IP-адрес-TruNAS>:8080`
+
+---
+
+### Пошаговая установка
+
+Если вы предпочитаете пошаговый процесс:
+
+#### Шаг 1: Подготовка директории
 
 Подключитесь к TrueNAS по SSH и выполните команды:
 
@@ -31,18 +61,14 @@ mkdir -p /mnt/data/apps/smart-kiosk
 cd /mnt/data/apps/smart-kiosk
 ```
 
-### Шаг 2: Клонирование репозитория
+#### Шаг 2: Клонирование репозитория
 
 ```bash
 # Клонируйте репозиторий
 git clone https://github.com/Undeadko21/smart-home-hub.git .
-
-# Или скопируйте файлы из существующей директории
-# cp /workspace/docker-compose.yaml .
-# cp /workspace/Dockerfile .
 ```
 
-### Шаг 3: Настройка конфигурации
+#### Шаг 3: Настройка конфигурации
 
 Создайте файл `.env` с вашими настройками:
 
@@ -79,26 +105,16 @@ MAX_LOG_FILES=3
 
 Сохраните файл (Ctrl+O, Enter) и выйдите (Ctrl+X).
 
-### Шаг 4: Создание Docker образа
+#### Шаг 4: Создание Docker образа и запуск
 
 ```bash
-# Соберите Docker образ
-docker build -t smart-kiosk:latest .
+# Соберите Docker образ и запустите приложение
+docker compose up -d --build
 ```
 
-Процесс сборки займёт 2-5 минут. После завершения вы увидите:
-```
-Successfully tagged smart-kiosk:latest
-```
+Процесс сборки займёт 2-5 минут.
 
-### Шаг 5: Запуск приложения
-
-```bash
-# Запустите приложение в фоновом режиме
-docker compose up -d
-```
-
-### Шаг 6: Проверка статуса
+#### Шаг 5: Проверка статуса
 
 ```bash
 # Проверить статус контейнеров
@@ -118,6 +134,8 @@ smart-kiosk     Up (healthy)              0.0.0.0:8080->8080/tcp
 ```
 
 Откройте браузер и перейдите по адресу: `http://<IP-адрес-TruNAS>:8080`
+
+---
 
 ## Управление приложением
 
@@ -156,11 +174,8 @@ cd /mnt/data/apps/smart-kiosk
 # Обновите исходный код из Git
 git pull origin main
 
-# Пересоберите образ
-docker build -t smart-kiosk:latest .
-
-# Пересоздайте контейнер
-docker compose up -d --force-recreate
+# Пересоберите образ и пересоздайте контейнер
+docker compose up -d --build --force-recreate
 ```
 
 ### Удаление приложения
