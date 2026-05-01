@@ -1,0 +1,11 @@
+{
+  "domain": "smart_home_hub",
+  "name": "Smart Home Hub",
+  "version": "1.0.0",
+  "documentation": "https://github.com/undeadko21/smart-home-hub",
+  "issue_tracker": "https://github.com/undeadko21/smart-home-hub/issues",
+  "requirements": [],
+  "dependencies": [],
+  "codeowners": ["@undeadko21"],
+  "config_flow": true
+}

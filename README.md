@@ -1,169 +1,33 @@
-# Smart Kiosk
+# Smart Home Hub
 
-Веб-приложение для умного дома с интеграцией Home Assistant и AI-ассистентом на базе DeepSeek.
+Integration for Home Assistant to control smart home devices via a web interface with AI assistant support.
 
-## Описание
+## Installation via HACS
 
-Smart Kiosk — это легковесное веб-приложение для управления устройствами умного дома через панель управления (киоск). Приложение предоставляет:
+1. Open Home Assistant
+2. Go to **HACS** (Home Assistant Community Store)
+3. Click on the three dots menu → **Custom repositories**
+4. Add this repository URL: `https://github.com/undeadko21/smart-home-hub`
+5. Select category: **Integration**
+6. Click **Add**
+7. Search for "Smart Home Hub" in HACS and install it
+8. Restart Home Assistant
+9. Go to **Settings** → **Devices & Services** → **Add Integration** → Search for "Smart Home Hub"
 
-- Интеграцию с **Home Assistant** для управления устройствами
-- **AI-ассистент** на основе DeepSeek API для обработки естественного языка
-- Кэширование ответов AI для оптимизации запросов
-- Очередь уведомлений для различных провайдеров
-- Rate limiting для защиты от перегрузки
-- Статический веб-интерфейс
+## Configuration
 
-## Структура проекта
+After installation, configure the integration through the UI:
 
-```
-.
-├── backend/
-│   ├── main.py           # Основной код приложения (FastAPI)
-│   ├── requirements.txt  # Зависимости Python
-│   └── start.sh          # Скрипт запуска
-├── static/
-│   └── index.html        # Веб-интерфейс
-├── chart/                # Helm chart для Kubernetes/TrueNAS
-│   ├── Chart.yaml
-│   ├── values.yaml
-│   ├── templates/
-│   └── questions/
-├── Dockerfile            # Docker-образ приложения
-├── docker-compose.yaml   # Конфигурация Docker Compose
-├── README.md             # Этот файл
-├── INSTALL.md            # Общая инструкция по установке
-├── INSTALL_PROXMOX.md    # Инструкция для Proxmox VE
-└── INSTALL_TRUENAS.md    # Инструкция для TrueNAS SCALE (загрузка Helm chart)
-```
+1. Go to **Settings** → **Devices & Services**
+2. Click **Add Integration**
+3. Search for **Smart Home Hub**
+4. Enter the host and port of your Smart Home Hub backend service
 
-## Технологии
+## Requirements
 
-- **Backend**: FastAPI, Uvicorn
-- **Database**: SQLite
-- **HTTP Client**: httpx
-- **Rate Limiting**: slowapi
-- **Контейнеризация**: Docker, Docker Compose
+- Home Assistant 2023.8 or newer
+- Smart Home Hub backend service running separately
 
-## Требования
+## Support
 
-- Docker и Docker Compose
-- Доступ к Home Assistant (опционально)
-- API ключ DeepSeek (опционально)
-
-## Установка и запуск
-
-### Быстрая установка (рекомендуется)
-
-Запустите скрипт автоматической установки **одной командой**:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/Undeadko21/smart-home-hub/main/install.sh | bash
-```
-
-Или скачайте и запустите вручную:
-
-```bash
-wget https://raw.githubusercontent.com/Undeadko21/smart-home-hub/main/install.sh
-chmod +x install.sh
-./install.sh
-```
-
-Скрипт автоматически:
-- Проверит наличие Docker и Docker Compose
-- Создаст директорию для данных
-- Создаст файл `.env` с настройками по умолчанию
-- Соберёт и запустит контейнер
-
-### Через Docker Compose (вручную)
-
-1. Отредактируйте `docker-compose.yaml` при необходимости:
-   - Укажите путь к директории данных в `volumes`
-   - Настройте переменные окружения
-
-2. Запустите контейнер:
-```bash
-docker compose up -d --build
-```
-
-3. Приложение будет доступно по адресу: `http://localhost:8080`
-
-### Установка на Proxmox VE
-
-Для установки на Proxmox VE (LXC контейнер или VM) следуйте инструкции:
-- [INSTALL_PROXMOX.md](INSTALL_PROXMOX.md) - Полная инструкция по установке на Proxmox
-
-### Установка на TrueNAS SCALE
-
-Для установки на TrueNAS SCALE следуйте инструкции:
-- [INSTALL_TRUENAS.md](INSTALL_TRUENAS.md) - Установка через загрузку Helm chart (единственный правильный способ для современных версий)
-
-### Переменные окружения
-
-| Переменная | Описание | По умолчанию |
-|------------|----------|--------------|
-| `DATA_DIR` | Директория для хранения данных (БД, логи, кэш) | `/app/data` |
-| `HA_TOKEN` | Токен доступа к Home Assistant | `` |
-| `DEEPSEEK_KEY` | API ключ для DeepSeek | `` |
-
-## API
-
-Приложение предоставляет следующие конечные точки:
-
-- `GET /` — Статический веб-интерфейс
-- `GET /api/health` — Проверка здоровья сервиса
-- Другие API эндпоинты для взаимодействия с Home Assistant и AI
-
-## База данных
-
-Приложение использует SQLite для хранения:
-
-- **config** — Конфигурация приложения
-- **ai_cache** — Кэш ответов AI (время жизни: 1 час)
-- **notification_queue** — Очередь уведомлений
-
-Путь к БД: `$DATA_DIR/app.db`
-
-## Логирование
-
-Логи сохраняются в: `$DATA_DIR/logs/app.log`
-
-## Ограничения ресурсов (Docker)
-
-В `docker-compose.yaml` настроены ограничения:
-
-- CPU: до 1.0 ядра
-- Память: до 512 МБ
-- Резервирование: 0.25 CPU, 128 МБ памяти
-
-## Health Check
-
-Контейнер включает проверку здоровья:
-- Интервал: 30 секунд
-- Таймаут: 5 секунд
-- Попытки: 3
-- Начальная задержка: 10 секунд
-
-Endpoint: `GET http://localhost:8080/api/health`
-
-## Безопасность
-
-- Запуск от непривилегированного пользователя (UID 1000)
-- `no-new-privileges` security option
-- Rate limiting для API endpoints
-
-## Поддерживаемые платформы
-
-- **Docker/Docker Compose** - Универсальный способ для любой ОС с поддержкой Docker
-- **Proxmox VE** - LXC контейнеры и виртуальные машины (см. [INSTALL_PROXMOX.md](INSTALL_PROXMOX.md))
-- **TrueNAS SCALE** - Установка через загрузку Helm chart (см. [INSTALL_TRUENAS.md](INSTALL_TRUENAS.md))
-- **Kubernetes** - Через Helm chart в директории `chart/`
-
----
-
-## Лицензия
-
-[Укажите лицензию]
-
-## Контакты
-
-[Укажите контактную информацию]
+For issues and feature requests, please open an issue on the [GitHub repository](https://github.com/undeadko21/smart-home-hub/issues).
