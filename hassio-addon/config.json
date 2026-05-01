@@ -1,0 +1,47 @@
+{
+  "name": "Smart Kiosk",
+  "version": "1.0.0",
+  "slug": "smart_kiosk",
+  "description": "Веб-приложение для умного дома с интеграцией Home Assistant и AI-ассистентом",
+  "url": "https://github.com/Undeadko21/smart-home-hub",
+  "arch": ["armv7", "armhf", "aarch64", "amd64", "i386"],
+  "homeassistant": "2023.1.0",
+  "image": "ghcr.io/undeadko21/smart-kiosk-{arch}",
+  "init": false,
+  "ports": {
+    "8080/tcp": null
+  },
+  "ports_description": {
+    "8080/tcp": "Web интерфейс Smart Kiosk"
+  },
+  "map": [],
+  "options": {
+    "ha_url": "",
+    "ha_token": "",
+    "deepseek_key": ""
+  },
+  "schema": {
+    "ha_url": "str?",
+    "ha_token": "str?",
+    "deepseek_key": "str?"
+  },
+  "environment": {
+    "DATA_DIR": "/data"
+  },
+  "volumes": [
+    "/data"
+  ],
+  "webui": "http://[HOST]:[PORT:8080]",
+  "startup": "application",
+  "boot": "auto",
+  "hassio_api": true,
+  "hassio_role": "default",
+  "host_network": false,
+  "ingress": true,
+  "ingress_port": 8080,
+  "panel_icon": "mdi:kiosk",
+  "panel_title": "Smart Kiosk",
+  "panel_admin": false,
+  "logo": "logo.png",
+  "icon": "icon.png"
+}
